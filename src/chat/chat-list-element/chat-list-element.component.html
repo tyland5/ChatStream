@@ -1,0 +1,12 @@
+<body>
+    <div (click)="emitChangeActiveChat()" class="flex gap-[10px] items-center flex-nowrap text-ellipsis hover:bg-gray-600">
+        <img class="h-[40px] min-w-[40px] bg-white rounded-full"/>
+
+        <!-- https://stackoverflow.com/questions/36230944/prevent-flex-items-from-overflowing-a-container -->
+        <div class="min-w-0">
+            <p class="text-ellipsis overflow-hidden whitespace-nowrap dark:text-white">{{chatName}}</p>
+            <p class="text-ellipsis overflow-hidden whitespace-nowrap dark:text-gray-300">{{latestMessage.name}}: {{latestMessage.message}}</p>
+        </div>
+    </div>
+    
+</body>

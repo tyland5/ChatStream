@@ -1,0 +1,27 @@
+<div>
+    <div class="flex gap-[10px] mb-[20px] hover:bg-gray-600">
+        <div>
+            <img class="h-[40px] w-[40px] bg-white rounded-full"/>
+        </div>
+            
+        <div>
+            <div class="flex items-end gap-[10px]">
+                <p class="text-base font-bold dark:text-white">{{messageInfo.senderInfo.name}}</p>
+                <p class="text-sm text-gray-500">10/5/2024 7:30pm</p>
+
+                <button mat-button [matMenuTriggerFor]="menu"><mat-icon class="text-white" aria-hidden="false" aria-label="Example home icon" fontIcon="more_horiz"></mat-icon></button>
+                <mat-menu #menu="matMenu">
+                    <button mat-menu-item>
+                        <span>Reply</span>
+                        <mat-icon class="order-2" fontIcon="reply"></mat-icon>
+                    </button>
+                    <button mat-menu-item>
+                        <span>Delete</span>
+                        <mat-icon class="order-2" fontIcon="delete"></mat-icon>
+                    </button>
+                </mat-menu>
+            </div>
+            <p class="text-base dark:text-white">{{messageInfo.messageObj.message}}</p>
+        </div>
+    </div>
+</div>

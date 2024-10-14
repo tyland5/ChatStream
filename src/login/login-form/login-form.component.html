@@ -1,0 +1,29 @@
+<!-- I established a hard define width on login form container. Made font size rem and input percentage -->
+
+
+<body>
+  <!--Here we can put logic to show if user is logged in??-->
+  <div class = "flex flex-col items-center w-full px-[16px] py-[24px] m-auto border-0 border-black sm:w-[640px] sm:border-2 dark:border-white">
+      <p class="text-xl text-center mb-4 dark:text-white">Sign into ChatStream</p>
+    
+      <div class="w-4/5 sm:w-1/2">
+        <p class="text-base dark:text-white">Username</p>
+        <input type="text" class="w-full mb-4 border-2 p-1 rounded-lg text-base" [(ngModel)]="username">
+      </div>
+    
+      <div class="w-4/5 sm:w-1/2">
+        <p class="text-base dark:text-white">Password</p>
+        <input type="text" class="w-full border-2 p-1 rounded-lg text-base" [(ngModel)]="password">
+        <div class="mb-8">
+          <a class="text-sm underline text-blue-600" routerLink="forgot-password">Forgot Password?<br></a>
+        </div>
+      </div>
+
+      <button class="bg-purple-400 text-lg py-3 px-6 rounded-lg block mb-4 dark:text-white hover:bg-purple-500" (click)="loginClicked()" >Log in</button>
+      <div class="text-center">
+        <p class="text-sm dark:text-white">No Account?
+          <a class="text-sm text-blue-600" routerLink="create-account">Create Account</a>
+        </p>
+      </div>
+  </div>
+</body>

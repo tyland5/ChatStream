@@ -1,0 +1,42 @@
+<body #chatPageContainer class="relative h-full overflow-hidden">
+    <div #chatHeader class="border-b-[1px] border-gray-50 w-full px-[10px] py-[12px]">
+        <p class="italic dark:text-white"> {{chatName}} </p>
+    </div>
+
+    <!-- h-[calc(100%-{{inputSize}}px)] -->
+    <div #chatMessages [style.height.px]="chatSize"
+    class="overflow-y-scroll py-[16px] px-[10px]" *ngIf ="chatId === ''">
+        <p class="dark:text-white"> CHOOSE A CHAT</p>
+    </div>
+
+    <div #chatMessages [style.height.px]="chatSize"
+    class="overflow-y-scroll py-[16px] px-[10px]" *ngIf ="chatId !== ''">
+        <p class="dark:text-white">FETCHING MESSAGES FROM NON NULL CHAT ID</p>
+        <p class="dark:text-white">CHAT HISTORY LENGTH: {{chatHistory.length}}</p>
+        <div *ngFor="let message of chatHistory">
+            <chat-message [messageInfo]="createMessageInput(message)"></chat-message>
+        </div>
+    </div>
+    
+
+    <div #textInput class ="absolute flex items-center bottom-0 w-full border-t-2 border-white py-[12px] px-[10px] z-10 dark:bg-black"> 
+        <mat-form-field [style.width] = "'80%'" subscriptSizing="dynamic">
+            <mat-label [style.color]="'white'">Send to</mat-label>
+            <textarea   matInput
+                cdkTextareaAutosize
+                [(ngModel)]="message"
+                #autosize="cdkTextareaAutosize"
+                cdkAutosizeMinRows="1"
+                cdkAutosizeMaxRows="5"
+                (input) = "changeChatMessage($event)"
+                [style.color]="'white'"  [style.fontSize]= "'1rem'"
+            ></textarea>
+        </mat-form-field>
+        <button (click)="sendMessage()">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-[40px] w-[40px] fill-purple-400 hover:cursor-pointer">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+            </svg>
+        </button>
+    </div>
+   
+</body>

@@ -1,0 +1,17 @@
+<body class="flex h-[calc(100vh-3rem)] w-full">
+    <div class="h-full overflow-auto w-1/5 min-w-[220px] px-[12px] border-r-[1px] border-gray-50">
+        <p class=" dark:text-white font-bold">Chats</p>
+
+        <div *ngFor="let chat of chatList">
+            <chatlist-element [chatName]="getChatName(chat)" [chatId]="getChatId(chat)" [latestMessage]="getLatestMessage(chat)" (changeActiveChat)="changeActiveChatId($event)"></chatlist-element>
+        </div>
+        <!-- <p class=" dark:text-white font-bold">Chats</p>
+        <div class="h-96 bg-red-400"></div>
+        <div class="h-96"></div>
+        <p class="dark:text-white"> Test </p> -->
+    </div>
+
+    <div class="w-4/5">
+        <chat-page [chatId]="activeChatId" [userInfoDict]="userInfoDict" [chatName]="activeChatName"></chat-page>
+    </div>
+</body>

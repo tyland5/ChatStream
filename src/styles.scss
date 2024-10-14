@@ -1,0 +1,15 @@
+/* You can add global styles to this file, and also import other style files */
+@import "../node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.mdc-text-field--filled:not(.mdc-text-field--disabled) {
+    background-color: gray !important;
+    border-radius: 0.5rem;
+  }
+  
+.mat-mdc-form-field{
+    border-radius: 0.5rem;
+}
