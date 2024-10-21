@@ -9,6 +9,8 @@ module.exports = {
     "./src/chat/chat-page/chat-page.component.{html,ts}",
     "./src/chat/chat-message/chat-message.component.{html,ts}",
     "./src/chat/chat-list-element/chat-list-element.component.{html,ts}",
+    "./src/user/user-list/user-list-element.component.{html,ts}",
+    "./src/chat/create-chat/create-chat.component.{html,ts}"
   ],
   theme: {
     extend: {},

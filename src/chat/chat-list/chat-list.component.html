@@ -1,14 +1,23 @@
-<body class="flex h-[calc(100vh-3rem)] w-full">
-    <div class="h-full overflow-auto w-1/5 min-w-[220px] px-[12px] border-r-[1px] border-gray-50">
-        <p class=" dark:text-white font-bold">Chats</p>
+<body class="flex h-[calc(100vh-3rem)] w-full pt-[16px]">
+    <div class="h-full overflow-auto w-1/5 min-w-[240px] px-[12px] border-r-[1px] border-gray-50">
+        
+        <div *ngIf="!creatingNewChat">
+            <div class="flex justify-between items-center mb-[16px]">
+                <p class=" dark:text-white font-bold">Chats</p>
+                <button mat-icon-button (click)="creatingNewChat = true">
+                    <mat-icon class="dark:text-white" fontIcon="add_circle"></mat-icon>
+                </button>
+            </div>
 
-        <div *ngFor="let chat of chatList">
-            <chatlist-element [chatName]="getChatName(chat)" [chatId]="getChatId(chat)" [latestMessage]="getLatestMessage(chat)" (changeActiveChat)="changeActiveChatId($event)"></chatlist-element>
+            <div *ngFor="let chat of chatList">
+                <chatlist-element [chatName]="getChatName(chat)" [chatId]="getChatId(chat)" [isActive]="chat.id === activeChatId" [latestMessage]="getLatestMessage(chat)" (changeActiveChat)="changeActiveChatId($event)"></chatlist-element>
+            </div>
         </div>
-        <!-- <p class=" dark:text-white font-bold">Chats</p>
-        <div class="h-96 bg-red-400"></div>
-        <div class="h-96"></div>
-        <p class="dark:text-white"> Test </p> -->
+
+        <div *ngIf="creatingNewChat">
+            <create-chat [friendList]="friendList" (closeCreateChat)="creatingNewChat = false"></create-chat>
+        </div>
+        
     </div>
 
     <div class="w-4/5">

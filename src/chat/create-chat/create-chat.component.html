@@ -1,0 +1,21 @@
+<div>
+    <button mat-icon-button (click)="endCreateChat()">
+        <mat-icon class="dark:text-white" fontIcon="arrow_back"></mat-icon>
+    </button>
+
+    <input type="text" class="w-full border-2 p-1 rounded-lg text-base" (input)="filterFriendList($event)">
+    <p class="text-sm dark:text-white">Add up to 4 other friends</p>
+
+    <div class="flex flex-wrap gap-[10px]">
+        <div *ngFor="let username of selectedUsers" class="bg-gray-500 p-[10px] hover:cursor-pointer" (click)="modifySelectedUsers(username)">
+            <p class="font-bold dark:text-white">{{username}}   X</p>
+        </div>
+    </div>
+
+    <p class="font-bold dark:text-white">Friend List</p>
+    <div *ngFor="let friend of filteredFriendList">
+        <userlist-element (changeSelection)="modifySelectedUsers($event)" [selected]="selectedUsers.includes(friend.username)" name="{{friend.name}}" username="{{friend.username}}" pfp="{{friend.pfp}}"></userlist-element>
+    </div>
+
+
+</div>

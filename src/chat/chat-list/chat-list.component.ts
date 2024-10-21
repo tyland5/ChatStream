@@ -5,21 +5,28 @@ import { ChatListElement } from '../chat-list-element/chat-list-element.componen
 import { ChatListService } from './chat-list.service';
 import { FinalChatListResponse, ChatListResponse, User, ActiveChat } from '../../interfaces/interfaces';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import {MatIconModule} from '@angular/material/icon';
+import { FriendsService } from '../../user/friends/friends.service';
+import { CreateChat } from "../create-chat/create-chat.component";
 
 @Component({
   selector: 'forgot-password',
   standalone: true,
-  imports: [ChatPage, ChatListElement, CommonModule],
+  imports: [ChatPage, ChatListElement, CommonModule, MatIconModule, FormsModule, CreateChat],
   templateUrl: './chat-list.component.html'
 })
 export class ChatList implements OnInit{
   
   chatList: ChatListResponse[] = []
+  friendList: User[]
   userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
   activeChatId: string = ""
   activeChatName: string = ""
+  creatingNewChat: boolean = false
+ 
 
-  constructor(private chatlistService: ChatListService){}
+  constructor(private chatlistService: ChatListService, private friendsService: FriendsService){}
   
   ngOnInit(): void {
     this.chatlistService.getChatlist().subscribe(chatList=>{
@@ -31,6 +38,10 @@ export class ChatList implements OnInit{
 
         this.chatList = (chatList as FinalChatListResponse).chatlist
       }
+    })
+
+    this.friendsService.getFriends(localStorage.getItem('uid') as string).subscribe(friendList => {
+      this.friendList = friendList
     })
   }
 
@@ -64,8 +75,6 @@ export class ChatList implements OnInit{
   }
 
   changeActiveChatId(event: ActiveChat){
-    console.log("ACTIVE CHANGED TO ")
-    console.log(event)
     this.activeChatId = event.chatId
     this.activeChatName = event.chatName
   }

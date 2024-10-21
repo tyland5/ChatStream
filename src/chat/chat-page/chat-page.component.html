@@ -11,8 +11,6 @@
 
     <div #chatMessages [style.height.px]="chatSize"
     class="overflow-y-scroll py-[16px] px-[10px]" *ngIf ="chatId !== ''">
-        <p class="dark:text-white">FETCHING MESSAGES FROM NON NULL CHAT ID</p>
-        <p class="dark:text-white">CHAT HISTORY LENGTH: {{chatHistory.length}}</p>
         <div *ngFor="let message of chatHistory">
             <chat-message [messageInfo]="createMessageInput(message)"></chat-message>
         </div>
@@ -21,7 +19,7 @@
 
     <div #textInput class ="absolute flex items-center bottom-0 w-full border-t-2 border-white py-[12px] px-[10px] z-10 dark:bg-black"> 
         <mat-form-field [style.width] = "'80%'" subscriptSizing="dynamic">
-            <mat-label [style.color]="'white'">Send to</mat-label>
+            <mat-label [style.color]="'white'">Send to {{chatName}}</mat-label>
             <textarea   matInput
                 cdkTextareaAutosize
                 [(ngModel)]="message"

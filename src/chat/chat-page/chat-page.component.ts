@@ -8,6 +8,7 @@ import { ChatPageService } from './chat-page.service';
 import { MessageResponse } from '../../interfaces/interfaces';
 import { CommonModule } from '@angular/common';
 import { User } from '../../interfaces/interfaces';
+import { Subscription } from 'rxjs';
 
 // A document, including all its embedded documents and arrays, cannot exceed 16MB
 @Component({
@@ -17,11 +18,12 @@ import { User } from '../../interfaces/interfaces';
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.scss'
 })
-export class ChatPage implements AfterViewInit, OnChanges{
+export class ChatPage implements AfterViewInit, OnChanges, OnInit{
   private _injector = inject(Injector);
   message: string = "";
   chatHistory: MessageResponse[];
   chatSize: number;
+  stompSubscription: Subscription;
 
   @Input() chatId: string;
   @Input() userInfoDict:  { [id: string]: User };
@@ -34,12 +36,29 @@ export class ChatPage implements AfterViewInit, OnChanges{
 
   constructor(private chatpageService: ChatPageService){}
 
+  ngOnInit(): void {
+    
+  }
+
   // used to display new messages when a user selects a different chat
   ngOnChanges(changes: SimpleChanges): void {
     if(changes['chatId'].currentValue !== changes['chatId'].previousValue){
       this.chatpageService.getMessages(this.chatId).subscribe(response=>{
         this.chatHistory = response;
       })
+
+      if (this.stompSubscription !== undefined){
+        this.stompSubscription.unsubscribe();
+      }
+
+      this.stompSubscription = this.chatpageService.changeSubscription(changes['chatId'].currentValue).subscribe(message => {
+        const messageObj: MessageResponse= JSON.parse(message.body)
+        this.chatHistory.push(messageObj)
+      })
+
+      setTimeout(()=>{
+        this.chatMessages.nativeElement.scrollTop = this.chatMessages.nativeElement.scrollHeight;
+      }, 150)
     }
   }
 
@@ -48,10 +67,6 @@ export class ChatPage implements AfterViewInit, OnChanges{
     setTimeout(() => {
       this.chatSize = this.chatScreen.nativeElement.offsetHeight - (this.chatHeader.nativeElement.offsetHeight) - (this.textInput.nativeElement.offsetHeight) ;
     }, 100);
-
-    setTimeout(()=>{
-      this.chatMessages.nativeElement.scrollTop = this.chatMessages.nativeElement.scrollHeight;
-    }, 150)
   }
 
   @HostListener('window:resize', ['$event'])
@@ -68,14 +83,8 @@ export class ChatPage implements AfterViewInit, OnChanges{
   @Output()
   sendMessage():void{
     const uid = localStorage.getItem('uid') as string;
-
-    this.chatpageService.sendMessage(this.message, this.chatId, uid, "test date").subscribe(messageSent=>{
-      if(messageSent){
-        const newMessageObj: MessageResponse = {message: this.message, chatId: this.chatId, sender: uid, sentAt: ""} 
-        this.chatHistory.push(newMessageObj)
-        this.message = ""
-      }
-    })
+    this.chatpageService.sendMessage(this.message, this.chatId, uid, "test date")
+    this.message = "";
   }
 
   createMessageInput(chat: MessageResponse){

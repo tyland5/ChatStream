@@ -36,24 +36,5 @@ export class ChatListService {
         return retrievedChatList.asObservable();
     }
 
-    /*
-    getChatlist(){
-        let retrievedChatList = new Subject<ChatListResponse[]>();
-        
-        // MAKE SURE WITH CREDENTIALS IS THERE OR CROSS SITE COOKIES WONT BE ALLOWED
-        this.http.get<ChatListResponse[]>('http://localhost:8080/get-chatlist', {responseType: "json", withCredentials: true})
-        .pipe(catchError(error => {
-            if(error.status == 401){
-                retrievedChatList.next([])
-            }
-            return throwError("invalid credentials")
-        }))
-        .subscribe((response: ChatListResponse[]) => {
-            console.log(response)
-            retrievedChatList.next(response) // you publish changes to the subscriber
-        });
-
-        return retrievedChatList.asObservable();
-    }
-        */
+    
 }
