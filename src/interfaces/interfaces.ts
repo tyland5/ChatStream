@@ -28,9 +28,10 @@ export interface FinalChatListResponse{
 }
 
 export interface MessageResponse{
+    id: string,
     sender: string,
     message: string,
-    sentAt: string,
+    sentAt: number,
     chatId: string
 }
 

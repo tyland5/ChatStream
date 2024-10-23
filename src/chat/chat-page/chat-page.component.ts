@@ -1,4 +1,4 @@
-import {afterNextRender, Component, inject, Injector, ViewChild, ElementRef, Input, Output, HostListener, AfterViewInit, OnInit, OnChanges, SimpleChanges} from '@angular/core';
+import {afterNextRender, Component, inject, Injector, ViewChild, ElementRef, Input, Output, HostListener, AfterViewInit, OnInit, OnChanges, SimpleChanges, OnDestroy} from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import {CdkTextareaAutosize, TextFieldModule} from '@angular/cdk/text-field';
@@ -18,7 +18,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.scss'
 })
-export class ChatPage implements AfterViewInit, OnChanges, OnInit{
+export class ChatPage implements AfterViewInit, OnChanges, OnDestroy{
   private _injector = inject(Injector);
   message: string = "";
   chatHistory: MessageResponse[];
@@ -36,9 +36,6 @@ export class ChatPage implements AfterViewInit, OnChanges, OnInit{
 
   constructor(private chatpageService: ChatPageService){}
 
-  ngOnInit(): void {
-    
-  }
 
   // used to display new messages when a user selects a different chat
   ngOnChanges(changes: SimpleChanges): void {
@@ -51,7 +48,7 @@ export class ChatPage implements AfterViewInit, OnChanges, OnInit{
         this.stompSubscription.unsubscribe();
       }
 
-      this.stompSubscription = this.chatpageService.changeSubscription(changes['chatId'].currentValue).subscribe(message => {
+      this.stompSubscription = this.chatpageService.changeSubscription(this.chatId).subscribe(message => {
         const messageObj: MessageResponse= JSON.parse(message.body)
         this.chatHistory.push(messageObj)
       })
@@ -59,6 +56,12 @@ export class ChatPage implements AfterViewInit, OnChanges, OnInit{
       setTimeout(()=>{
         this.chatMessages.nativeElement.scrollTop = this.chatMessages.nativeElement.scrollHeight;
       }, 150)
+    }
+  }
+
+  ngOnDestroy(): void {
+    if (this.stompSubscription !== undefined){
+      this.stompSubscription.unsubscribe(); // necessary
     }
   }
 
@@ -82,8 +85,11 @@ export class ChatPage implements AfterViewInit, OnChanges, OnInit{
 
   @Output()
   sendMessage():void{
+    if(this.chatId ===""){
+      return
+    }
     const uid = localStorage.getItem('uid') as string;
-    this.chatpageService.sendMessage(this.message, this.chatId, uid, "test date")
+    this.chatpageService.sendMessage(this.message, this.chatId, uid)
     this.message = "";
   }
 

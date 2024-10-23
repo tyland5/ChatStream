@@ -1,0 +1,9 @@
+<body class="flex h-[calc(100vh-3rem)] w-full pt-[16px] overflow-x-hidden">
+    <div class="h-full overflow-y-auto w-1/5 min-w-[240px] px-[12px] border-r-[1px] border-gray-50">
+        <chat-list [chatList]="chatList" [friendList]="friendList" [userInfoDict]="userInfoDict" (changeActiveChat)="changeActiveChat($event)"></chat-list>
+    </div>
+
+    <div class="w-4/5">
+        <chat-page [chatId]="activeChatId" [userInfoDict]="userInfoDict" [chatName]="activeChatName"></chat-page>
+    </div>
+</body>

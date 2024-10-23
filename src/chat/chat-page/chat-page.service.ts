@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Subject } from 'rxjs';
+import { Subject, Observable} from 'rxjs';
 import { MessageResponse } from '../../interfaces/interfaces';
-import {RxStomp } from '@stomp/rx-stomp';
+import {RxStomp, IMessage } from '@stomp/rx-stomp';
+
 
 @Injectable({
   providedIn: 'root',
@@ -35,7 +36,9 @@ export class ChatPageService {
       this.rxStompService.deactivate();
     }
 
-    sendMessage(message: string, chatId: string, sender:string, sentAt:string){
+    sendMessage(message: string, chatId: string, sender:string){
+      const sentAt = Date.now()
+
       this.rxStompService.publish({ destination: '/chat/sendChat/' + chatId, body: JSON.stringify({message: message, chatId: chatId, sender:sender, sentAt:sentAt}) });
     }
 
@@ -43,33 +46,9 @@ export class ChatPageService {
       const chatMessages = new Subject<MessageResponse[]>();
 
       this.http.get<MessageResponse[]>('http://localhost:8080/get-messages', {responseType:"json", withCredentials: true, params:{chatId:chatId}}).subscribe(messages =>{
-        console.log(messages)
         chatMessages.next(messages)
       })
 
       return chatMessages.asObservable();
     }
-
-    /*
-    sendMessage(message: string, chatId: string, sender:string, sentAt:string){
-        let messageSent = new Subject<boolean>();
-        let csrf = localStorage.getItem("csrf");
-        
-        if (csrf == null){
-          csrf = ""
-        }
-
-        const headerDict = new HttpHeaders({
-          'csrf': csrf,
-          'Content-Type': 'application/json'
-        })
-
-        this.http.post('http://localhost:8080/send-message', {message: message, chatId: chatId, sender:sender, sentAt:sentAt}, 
-          {responseType:"json", withCredentials: true, headers: headerDict}).subscribe(response => {
-          messageSent.next(true)
-        });
-
-        return messageSent.asObservable();
-    }
-    */
 }

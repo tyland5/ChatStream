@@ -10,7 +10,7 @@ export class ChatListService {
     constructor(private http:HttpClient){}
     
     getChatlist(){
-        let retrievedChatList = new Subject<ChatListResponse[] | FinalChatListResponse>();
+        let retrievedChatList = new Subject<FinalChatListResponse>();
         let chatList: ChatListResponse[] | FinalChatListResponse= [] 
         
         // MAKE SURE WITH CREDENTIALS IS THERE OR CROSS SITE COOKIES WONT BE ALLOWED
@@ -23,13 +23,10 @@ export class ChatListService {
                 userIds = userIds.concat(chat.members)
             })
             
-            console.log(response)
             return this.http.get('http://localhost:8080/get-user-info',{params: {uids: userIds}, responseType: "json", withCredentials: true});
         }))
         
         .subscribe((response2)=>{
-            console.log("response 2 jsakfjas;fdjsfas;fsfsafsafsaf")
-            console.log(response2)
             retrievedChatList.next({chatlist: chatList as ChatListResponse[], users: response2 as User[]})
         })
         

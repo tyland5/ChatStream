@@ -1,49 +1,28 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Component, OnInit, Input, Output, EventEmitter} from '@angular/core';
 import { ChatPage } from '../chat-page/chat-page.component';
 import { ChatListElement } from '../chat-list-element/chat-list-element.component';
-import { ChatListService } from './chat-list.service';
 import { FinalChatListResponse, ChatListResponse, User, ActiveChat } from '../../interfaces/interfaces';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {MatIconModule} from '@angular/material/icon';
-import { FriendsService } from '../../user/friends/friends.service';
 import { CreateChat } from "../create-chat/create-chat.component";
 
 @Component({
-  selector: 'forgot-password',
+  selector: 'chat-list',
   standalone: true,
   imports: [ChatPage, ChatListElement, CommonModule, MatIconModule, FormsModule, CreateChat],
   templateUrl: './chat-list.component.html'
 })
-export class ChatList implements OnInit{
+export class ChatList{
   
-  chatList: ChatListResponse[] = []
-  friendList: User[]
-  userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
-  activeChatId: string = ""
-  activeChatName: string = ""
+  @Input() chatList: ChatListResponse[] = []
+  @Input() friendList: User[]
+  @Input() userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
+  activeChat: ActiveChat = {chatId: "", chatName: ""}
   creatingNewChat: boolean = false
- 
 
-  constructor(private chatlistService: ChatListService, private friendsService: FriendsService){}
-  
-  ngOnInit(): void {
-    this.chatlistService.getChatlist().subscribe(chatList=>{
-      if(chatList){
-        const users = (chatList as FinalChatListResponse).users
-        users.forEach(user => {
-          this.userInfoDict[user.id] = user 
-        });
-
-        this.chatList = (chatList as FinalChatListResponse).chatlist
-      }
-    })
-
-    this.friendsService.getFriends(localStorage.getItem('uid') as string).subscribe(friendList => {
-      this.friendList = friendList
-    })
-  }
+  // signal to chat tab so it can pass updated info to chat-page component
+  @Output() changeActiveChat = new EventEmitter<ActiveChat>();
 
   // helper function for ngFor of chatlist element
   getChatName(chat: ChatListResponse): string{
@@ -74,8 +53,8 @@ export class ChatList implements OnInit{
     return chat.id
   }
 
-  changeActiveChatId(event: ActiveChat){
-    this.activeChatId = event.chatId
-    this.activeChatName = event.chatName
+  changeActiveChatFunction(event: ActiveChat){
+    this.activeChat = event
+    this.changeActiveChat.emit(this.activeChat)
   }
 }
