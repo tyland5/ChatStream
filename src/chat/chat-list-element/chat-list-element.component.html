@@ -1,11 +1,11 @@
 
-<div (click)="emitChangeActiveChat()" [ngStyle]="this.isActive ? {'background-color': '#4b5563'} : {'background-color': '#000000'}" 
+<div (click)="changeActiveChat()" [ngStyle]="this.isActive ? {'background-color': '#4b5563'} : {'background-color': '#000000'}" 
 class="flex gap-[10px] items-center flex-nowrap text-ellipsis hover:bg-gray-600 mb-[16px] cursor-pointer">
     <img class="h-[40px] min-w-[40px] bg-white rounded-full"/>
 
     <!-- https://stackoverflow.com/questions/36230944/prevent-flex-items-from-overflowing-a-container -->
     <div class="min-w-0">
         <p class="text-ellipsis overflow-hidden whitespace-nowrap dark:text-white">{{chatName}}</p>
-        <p class="text-ellipsis overflow-hidden whitespace-nowrap dark:text-gray-300">{{latestMessage.name}}: {{latestMessage.message}}</p>
+        <p class="text-ellipsis overflow-hidden whitespace-nowrap dark:text-gray-300">{{ latestMessage.name !== "" ? latestMessage.name + " : " + latestMessage.message : "No messages"}}</p>
     </div>
 </div>

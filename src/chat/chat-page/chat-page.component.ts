@@ -9,6 +9,7 @@ import { MessageResponse } from '../../interfaces/interfaces';
 import { CommonModule } from '@angular/common';
 import { User } from '../../interfaces/interfaces';
 import { Subscription } from 'rxjs';
+import { ChatTabService } from '../chat-tab/chat-tab.service';
 
 // A document, including all its embedded documents and arrays, cannot exceed 16MB
 @Component({
@@ -16,30 +17,34 @@ import { Subscription } from 'rxjs';
   standalone: true,
   imports: [MatFormFieldModule, MatInputModule, TextFieldModule, ChatMessage, FormsModule, CommonModule],
   templateUrl: './chat-page.component.html',
-  styleUrl: './chat-page.component.scss'
+  styleUrl: './chat-page.component.scss',
 })
-export class ChatPage implements AfterViewInit, OnChanges, OnDestroy{
+export class ChatPage implements AfterViewInit, OnDestroy, OnInit{
   private _injector = inject(Injector);
   message: string = "";
   chatHistory: MessageResponse[];
   chatSize: number;
   stompSubscription: Subscription;
+  activeChatSubscription: Subscription;
 
-  @Input() chatId: string;
+  chatId: string;
+  chatName: string;
+
   @Input() userInfoDict:  { [id: string]: User };
-  @Input() chatName: string;
   @ViewChild('autosize') autosize: CdkTextareaAutosize;
   @ViewChild('textInput') textInput: ElementRef;
   @ViewChild('chatPageContainer') chatScreen: ElementRef;
   @ViewChild('chatHeader') chatHeader: ElementRef;
   @ViewChild('chatMessages') chatMessages: ElementRef;
 
-  constructor(private chatpageService: ChatPageService){}
+  constructor(private chatpageService: ChatPageService, private chatTabService: ChatTabService){}
 
+  ngOnInit(): void {
 
-  // used to display new messages when a user selects a different chat
-  ngOnChanges(changes: SimpleChanges): void {
-    if(changes['chatId'].currentValue !== changes['chatId'].previousValue){
+    this.activeChatSubscription = this.chatTabService.activeChat.subscribe(newActiveChat => {
+      this.chatId = newActiveChat.chatId
+      this.chatName = newActiveChat.chatName
+
       this.chatpageService.getMessages(this.chatId).subscribe(response=>{
         this.chatHistory = response;
       })
@@ -56,13 +61,16 @@ export class ChatPage implements AfterViewInit, OnChanges, OnDestroy{
       setTimeout(()=>{
         this.chatMessages.nativeElement.scrollTop = this.chatMessages.nativeElement.scrollHeight;
       }, 150)
-    }
+    })
   }
+
 
   ngOnDestroy(): void {
     if (this.stompSubscription !== undefined){
       this.stompSubscription.unsubscribe(); // necessary
     }
+
+    this.activeChatSubscription.unsubscribe();
   }
 
   ngAfterViewInit() {
@@ -85,6 +93,7 @@ export class ChatPage implements AfterViewInit, OnChanges, OnDestroy{
 
   @Output()
   sendMessage():void{
+
     if(this.chatId ===""){
       return
     }

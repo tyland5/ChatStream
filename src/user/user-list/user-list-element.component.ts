@@ -10,6 +10,7 @@ import { MatCheckbox } from '@angular/material/checkbox';
   templateUrl: './user-list-element.component.html'
 })
 export class UserListElement {
+  @Input() id: string;
   @Input() username: string;
   @Input() name: string;
   @Input() pfp: string;
@@ -19,6 +20,6 @@ export class UserListElement {
 
 
   userSelected(): void{
-    this.changeSelection.emit(this.username);
+    this.changeSelection.emit(this.id);
   }
 } 

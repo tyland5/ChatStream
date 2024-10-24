@@ -8,6 +8,7 @@ import { ChatList } from '../chat-list/chat-list.component';
 import { Observable, Subscription } from 'rxjs';
 import { IMessage } from '@stomp/rx-stomp';
 import { ChatPageService } from '../chat-page/chat-page.service';
+import { ChatTabService } from './chat-tab.service';
 
 @Component({
   selector: 'forgot-password',
@@ -18,45 +19,50 @@ import { ChatPageService } from '../chat-page/chat-page.service';
 export class ChatTab implements OnInit, OnDestroy{
   
   chatList: ChatListResponse[] = []
-  friendList: User[]
   userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
   activeChatId: string = ""
   activeChatName: string = ""
   creatingNewChat: boolean = false
  
   chatSubscriptions : Subscription[] = []
+  chatListSubscription: Subscription;
+  chatListRxStomp: Subscription;
 
-  constructor(private chatlistService: ChatListService, private chatPageService: ChatPageService, private friendsService: FriendsService){}
+  constructor(private chatlistService: ChatListService, private chatPageService: ChatPageService, private friendsService: FriendsService, private chatTabService: ChatTabService){
+  }
   
+  // keeping these calls here because if I switched to mobile view and conditionally rendered chatlist, then these would always execute on init when it shouldn't
   ngOnInit(): void {
-    this.chatlistService.getChatlist().subscribe((chatList: FinalChatListResponse)=>{
-      if(chatList){
-        const users = chatList.users
+
+    // need this for createChatSubscription (to update chat list properly when using chat publish subscribe websocket)
+    this.chatListSubscription = this.chatTabService.chatList.subscribe(newChatList => {
+      this.chatList = newChatList
+    })
+
+    this.chatListRxStomp = this.chatlistService.getChatlistSubscription(localStorage.getItem("uid") as string).subscribe(response => {
+      const newChat: ChatListResponse = JSON.parse(response.body)
+      this.chatTabService.updateChatList([newChat, ...this.chatList])
+      this.createChatSubscription(newChat)
+    })
+
+    this.chatlistService.getChatlist().subscribe((finalChatListResponse: FinalChatListResponse)=>{
+      if(finalChatListResponse){
+        const users = finalChatListResponse.users
         users.forEach(user => {
           this.userInfoDict[user.id] = user 
         });
 
-        this.chatList = chatList.chatlist
+        const chatList = finalChatListResponse.chatlist
+        this.chatTabService.updateChatList(chatList)
 
-        chatList.chatlist.forEach((chat: ChatListResponse) =>{
-          // create observable for this component and chat page component first
-          const chatPubSub = this.chatPageService.changeSubscription(chat.id)
-
-          const chatSub = chatPubSub.subscribe(message => {
-            const messageObj: MessageResponse= JSON.parse(message.body)
-            
-            const index = this.chatList.findIndex((chat) => chat.id === messageObj.chatId)
-            this.chatList[index] = {...this.chatList[index], latestMessage:{uid: messageObj.sender, message: messageObj.message}}
-            this.chatList = [this.chatList[index], ...this.chatList.slice(0, index), ...this.chatList.slice(index+1)] // slice handles out of bounds 
-          })
-
-          this.chatSubscriptions.push(chatSub)
+        chatList.forEach((chat: ChatListResponse) =>{
+          this.createChatSubscription(chat)
         })
       }
     })
 
     this.friendsService.getFriends(localStorage.getItem('uid') as string).subscribe(friendList => {
-      this.friendList = friendList
+      this.chatTabService.updateFriendList(friendList)
     })
   }
 
@@ -64,10 +70,23 @@ export class ChatTab implements OnInit, OnDestroy{
     this.chatSubscriptions.forEach(subscription => {
       subscription.unsubscribe()
     })
+
+    this.chatListSubscription.unsubscribe()
+    this.chatListRxStomp.unsubscribe()
   }
 
-  changeActiveChat(event: ActiveChat){
-    this.activeChatId = event.chatId
-    this.activeChatName = event.chatName
+  createChatSubscription(chat: ChatListResponse) : void{
+    // create observable for this component and chat page component first
+    const chatPubSub = this.chatPageService.changeSubscription(chat.id)
+
+    const chatSub = chatPubSub.subscribe(message => {
+      const messageObj: MessageResponse= JSON.parse(message.body)
+      
+      const index = this.chatList.findIndex((chat) => chat.id === messageObj.chatId)
+      this.chatList[index] = {...this.chatList[index], latestMessage:{uid: messageObj.sender, message: messageObj.message}}
+      this.chatTabService.updateChatList([this.chatList[index], ...this.chatList.slice(0, index), ...this.chatList.slice(index+1)]) // slice handles out of bounds 
+    })
+
+    this.chatSubscriptions.push(chatSub)
   }
 }

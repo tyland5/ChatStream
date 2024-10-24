@@ -9,20 +9,20 @@
         <p class="text-sm dark:text-white">Add up to 4 other friends</p>
 
         <div class="flex flex-wrap gap-[10px]">
-            <div *ngFor="let username of selectedUsers" class="bg-gray-500 p-[10px] hover:cursor-pointer" (click)="modifySelectedUsers(username)">
-                <p class="font-bold dark:text-white">{{username}}   X</p>
+            <div *ngFor="let uid of selectedUsers" class="bg-gray-500 p-[10px] hover:cursor-pointer" (click)="modifySelectedUsers(uid)">
+                <p class="font-bold dark:text-white">{{friendMap[uid]}}   X</p>
             </div>
         </div>
     </div>
 
     <p class="font-bold dark:text-white mb-[10px]">Friend List</p>
     <div *ngFor="let friend of filteredFriendList">
-        <userlist-element (changeSelection)="modifySelectedUsers($event)" [selected]="selectedUsers.includes(friend.username)" name="{{friend.name}}" username="{{friend.username}}" pfp="{{friend.pfp}}"></userlist-element>
+        <userlist-element (changeSelection)="modifySelectedUsers($event)" [selected]="selectedUsers.has(friend.id)" id = "{{friend.id}}" name="{{friend.name}}" username="{{friend.username}}" pfp="{{friend.pfp}}"></userlist-element>
     </div>
 
 
-    <div *ngIf="selectedUsers.length !== 0" class="absolute flex justify-center bottom-0 w-[calc(20%-13px)] min-w-[calc(240px-13px)] px-[10px] py-[10px] dark:bg-black">
-        <button class="p-[10px] aligh bg-purple-500 rounded-lg">
+    <div *ngIf="selectedUsers.size !== 0" class="absolute flex justify-center bottom-0 w-[calc(20%-13px)] min-w-[calc(240px-13px)] px-[10px] py-[10px] dark:bg-black">
+        <button class="p-[10px] aligh bg-purple-500 rounded-lg" (click)="createChat()">
             <p class="dark:text-white">Create Chat</p>
         </button>
     </div>

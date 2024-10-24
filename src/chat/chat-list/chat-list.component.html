@@ -9,12 +9,12 @@
         </div>
 
         <div *ngFor="let chat of chatList">
-            <chatlist-element [chatName]="getChatName(chat)" [chatId]="getChatId(chat)" [isActive]="chat.id === activeChat.chatId" [latestMessage]="getLatestMessage(chat)" (changeActiveChat)="changeActiveChatFunction($event)"></chatlist-element>
+            <chatlist-element [chatName]="getChatName(chat)" [chatId]="getChatId(chat)" [isActive]="chat.id === activeChat.chatId" [latestMessage]="getLatestMessage(chat)" ></chatlist-element>
         </div>
     </div>
 
     <div *ngIf="creatingNewChat">
-        <create-chat [friendList]="friendList" (closeCreateChat)="creatingNewChat = false"></create-chat>
+        <create-chat (closeCreateChat)="creatingNewChat = false"></create-chat>
     </div>
         
 </div> 

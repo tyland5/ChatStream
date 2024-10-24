@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, OnInit } from '@angular/core';
 import { ActiveChat } from '../../interfaces/interfaces';
 import { CommonModule } from '@angular/common';
+import { ChatTabService } from '../chat-tab/chat-tab.service';
 
 @Component({
   selector: 'chatlist-element',
@@ -14,13 +15,13 @@ export class ChatListElement implements OnInit {
   @Input() chatPic: string = "";
   @Input() chatId: string = "";
   @Input() isActive: Boolean = false;
-
-  @Output() changeActiveChat = new EventEmitter<ActiveChat>();
   
+  constructor(private chatTabService: ChatTabService){}
+
   ngOnInit(): void {
   }
 
-  emitChangeActiveChat(){
-    this.changeActiveChat.emit({chatId: this.chatId, chatName: this.chatName});
+  changeActiveChat(){
+    this.chatTabService.updateActiveChat({chatId: this.chatId, chatName: this.chatName})
   }
 } 
