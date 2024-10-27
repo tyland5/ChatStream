@@ -10,12 +10,13 @@ import { CommonModule } from '@angular/common';
 import { User } from '../../interfaces/interfaces';
 import { Subscription } from 'rxjs';
 import { ChatTabService } from '../chat-tab/chat-tab.service';
+import {MatIconModule} from '@angular/material/icon';
 
 // A document, including all its embedded documents and arrays, cannot exceed 16MB
 @Component({
   selector: 'chat-page',
   standalone: true,
-  imports: [MatFormFieldModule, MatInputModule, TextFieldModule, ChatMessage, FormsModule, CommonModule],
+  imports: [MatFormFieldModule, MatInputModule, TextFieldModule, ChatMessage, FormsModule, CommonModule, MatIconModule],
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.scss',
 })
@@ -26,6 +27,7 @@ export class ChatPage implements AfterViewInit, OnDestroy, OnInit{
   chatSize: number;
   stompSubscription: Subscription;
   activeChatSubscription: Subscription;
+  editingMessageId: string = "";
 
   chatId: string;
   chatName: string;
@@ -55,7 +57,16 @@ export class ChatPage implements AfterViewInit, OnDestroy, OnInit{
 
       this.stompSubscription = this.chatpageService.changeSubscription(this.chatId).subscribe(message => {
         const messageObj: MessageResponse= JSON.parse(message.body)
-        this.chatHistory.push(messageObj)
+        if(messageObj.type === "create"){
+          this.chatHistory.push(messageObj)
+        }
+        else if(messageObj.type === "delete"){
+          this.chatHistory = this.chatHistory.filter(message => message.id !== messageObj.id)
+        }
+        else{
+          const index = this.chatHistory.findIndex(message => message.id === messageObj.id)
+          this.chatHistory[index].message = messageObj.message
+        }
       })
 
       setTimeout(()=>{
@@ -97,6 +108,14 @@ export class ChatPage implements AfterViewInit, OnDestroy, OnInit{
     if(this.chatId ===""){
       return
     }
+
+    if(this.editingMessageId !== ""){
+      this.chatpageService.updateMessage(this.editingMessageId, this.message, this.chatId, "edit")
+      this.message = ""
+      this.editingMessageId = ""
+      return
+    }
+
     const uid = localStorage.getItem('uid') as string;
     this.chatpageService.sendMessage(this.message, this.chatId, uid)
     this.message = "";
@@ -105,5 +124,21 @@ export class ChatPage implements AfterViewInit, OnDestroy, OnInit{
   createMessageInput(chat: MessageResponse){
     const userInfo = this.userInfoDict[chat.sender]
     return {messageObj: chat, senderInfo: userInfo}
+  }
+
+  changeEditingMessageId(id: string){
+    this.editingMessageId = id
+    this.message = this.chatHistory.filter(message => message.id === id)[0].message
+  }
+
+  getInputLabel(){
+    let inputLabel: string = "Send to " + this.chatName 
+
+    // editing
+    if(this.editingMessageId != ""){
+      inputLabel = "Edit highlighted message"
+    }
+
+    return inputLabel
   }
 }

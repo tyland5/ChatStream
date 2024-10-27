@@ -26,7 +26,12 @@ export class ChatPageService {
     sendMessage(message: string, chatId: string, sender:string){
       const sentAt = Date.now()
 
-      this.rxStomp.publish({ destination: '/chat/sendChat/' + chatId, body: JSON.stringify({message: message, chatId: chatId, sender:sender, sentAt:sentAt}) });
+      this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body: JSON.stringify({message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create"}) });
+    }
+
+    // type can only be edit or delete
+    updateMessage(messageId: string, message: string, chatId: string, type: string){
+      this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body: JSON.stringify({ id: messageId, message: message, chatId: chatId, type: type}) });
     }
 
     getMessages(chatId: string){

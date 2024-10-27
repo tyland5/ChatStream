@@ -44,7 +44,7 @@ export class ChatList implements OnInit, OnDestroy{
   // helper function for ngFor of chatlist element
   getChatName(chat: ChatListResponse): string{
     if(chat.members.length > 2){
-      return "GROUP CHAT PLACEHOLDER NAME"
+      return chat.chatName as string
     }
 
     const selfUid = localStorage.getItem("uid")

@@ -6,7 +6,6 @@ import { ChatListResponse, User } from '../../interfaces/interfaces';
 import { UserListElement } from '../../user/user-list/user-list-element.component';
 import { ChatTabService } from '../chat-tab/chat-tab.service';
 import { Subscription } from 'rxjs';
-import { ChatPageService } from '../chat-page/chat-page.service';
 import { ChatListService } from '../chat-list/chat-list.service';
 
 @Component({
@@ -26,7 +25,7 @@ export class CreateChat implements OnInit, OnDestroy{
 
   @Output() closeCreateChat = new EventEmitter<void>();
 
-  constructor(private chatTabService: ChatTabService, private chatPageService: ChatPageService, private chatListService: ChatListService){}
+  constructor(private chatTabService: ChatTabService, private chatListService: ChatListService){}
 
   ngOnInit(): void {
     this.friendListSubscription = this.chatTabService.friendList.subscribe(newFriendList =>{
@@ -79,7 +78,7 @@ export class CreateChat implements OnInit, OnDestroy{
     }
 
     if(!chatExists){
-      this.chatTabService.updateActiveChat({chatId: "", chatName: this.selectedUsers.size === 1 ? this.friendMap[this.selectedUsers.values().next().value as string] : "New GC"})
+      this.chatTabService.updateActiveChat({chatId: "", chatName: ""})
       this.chatListService.createNewChat(Array.from(finalSelectedUsers))
       console.log("chat does not exist")
     }
@@ -95,7 +94,7 @@ export class CreateChat implements OnInit, OnDestroy{
 
   getChatName(chat: ChatListResponse): string{
     if(chat.members.length > 2){
-      return "GROUP CHAT PLACEHOLDER NAME"
+      return chat.chatName as string
     }
 
     const selfUid = localStorage.getItem("uid")

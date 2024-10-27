@@ -32,7 +32,8 @@ export interface MessageResponse{
     sender: string,
     message: string,
     sentAt: number,
-    chatId: string
+    chatId: string,
+    type: string
 }
 
 export interface ActiveChat{

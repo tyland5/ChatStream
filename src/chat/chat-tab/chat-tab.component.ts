@@ -82,6 +82,11 @@ export class ChatTab implements OnInit, OnDestroy{
     const chatSub = chatPubSub.subscribe(message => {
       const messageObj: MessageResponse= JSON.parse(message.body)
       
+      // if someone edits or delete a message, we dont want the chat to appear at the top since not important
+      if(messageObj.type !== "create"){
+        return
+      }
+
       const index = this.chatList.findIndex((chat) => chat.id === messageObj.chatId)
       this.chatList[index] = {...this.chatList[index], latestMessage:{uid: messageObj.sender, message: messageObj.message}}
       this.chatTabService.updateChatList([this.chatList[index], ...this.chatList.slice(0, index), ...this.chatList.slice(index+1)]) // slice handles out of bounds 

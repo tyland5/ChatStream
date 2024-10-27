@@ -12,14 +12,19 @@
     <div #chatMessages [style.height.px]="chatSize"
     class="overflow-y-scroll py-[16px] px-[10px]" *ngIf ="chatId !== ''">
         <div *ngFor="let message of chatHistory">
-            <chat-message [messageInfo]="createMessageInput(message)"></chat-message>
+            <chat-message (editingMessageId)="changeEditingMessageId($event)" [messageInfo]="createMessageInput(message)" [highlightedMessage] = "editingMessageId === message.id"></chat-message>
         </div>
     </div>
     
 
-    <div #textInput class ="absolute flex items-center bottom-0 w-full border-t-2 border-white py-[12px] px-[10px] z-10 dark:bg-black"> 
+    <div #textInput class ="absolute flex flex-wrap items-center bottom-0 w-full border-t-2 border-white py-[12px] px-[10px] z-10 dark:bg-black"> 
+        <div *ngIf="editingMessageId !== ''" class="w-full mb-[10px] flex gap-[10px] items-center">
+            <mat-icon (click)="editingMessageId = ''; message ='' " class="dark:text-white hover:cursor-pointer" fontIcon="cancel"></mat-icon>
+            <p (click)="editingMessageId = ''; ; message =''" class="text-sm underline font-bold dark:text-white hover:cursor-pointer">Cancel Edit</p>
+        </div>
+
         <mat-form-field [style.width] = "'80%'" subscriptSizing="dynamic">
-            <mat-label [style.color]="'white'">Send to {{chatName}}</mat-label>
+            <mat-label [style.color]="'white'">{{getInputLabel()}}</mat-label>
             <textarea   matInput
                 cdkTextareaAutosize
                 [(ngModel)]="message"

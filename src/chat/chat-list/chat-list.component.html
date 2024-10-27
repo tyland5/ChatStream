@@ -3,9 +3,9 @@
     <div *ngIf="!creatingNewChat">
         <div class="flex justify-between items-center mb-[16px]">
             <p class=" dark:text-white font-bold">Chats</p>
-            <button mat-icon-button (click)="creatingNewChat = true">
+            <div (click)="creatingNewChat = true" class="flex content-center hover:cursor-pointer">
                 <mat-icon class="dark:text-white" fontIcon="add_circle"></mat-icon>
-            </button>
+            </div>
         </div>
 
         <div *ngFor="let chat of chatList">
