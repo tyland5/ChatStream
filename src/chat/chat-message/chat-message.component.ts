@@ -16,6 +16,7 @@ import { CommonModule } from '@angular/common';
 export class ChatMessage{
   @Input() messageInfo: {messageObj: MessageResponse, senderInfo: User};
   @Input() highlightedMessage: boolean;
+  @Input() mediaUrl: string;
   uid: string = localStorage.getItem('uid') as string
   @Output() editingMessageId = new EventEmitter<string>();
 

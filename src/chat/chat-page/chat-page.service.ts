@@ -23,10 +23,30 @@ export class ChatPageService {
       this.rxStomp.deactivate();
     }
 
-    sendMessage(message: string, chatId: string, sender:string){
+    sendMessage(message: string, chatId: string, sender:string, media:File|undefined){
       const sentAt = Date.now()
 
-      this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body: JSON.stringify({message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create"}) });
+      if(media !== undefined){
+        const mediaExtension = media.name.split(".").at(-1)
+       
+        const mediaName = sender + "msg_" + sentAt.toString() + "." + mediaExtension
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result as string;
+          this.http.post<Object>("http://localhost:8080/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: base64, mediaName: mediaName}, {responseType:"json", withCredentials: true})
+          .subscribe(response => {
+            this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body:JSON.stringify({...response})});
+          })
+        };
+        reader.readAsDataURL(media);
+
+        return
+      }
+
+      this.http.post<Object>("http://localhost:8080/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: "", mediaName: ""}, {responseType:"json", withCredentials: true})
+      .subscribe(response => {
+        this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body:JSON.stringify({...response})});
+      })
     }
 
     // type can only be edit or delete

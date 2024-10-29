@@ -20,32 +20,35 @@ import {MatIconModule} from '@angular/material/icon';
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.scss',
 })
-export class ChatPage implements AfterViewInit, OnDestroy, OnInit{
+export class ChatPage implements OnDestroy, OnInit{
   private _injector = inject(Injector);
   message: string = "";
   chatHistory: MessageResponse[];
-  chatSize: number;
   stompSubscription: Subscription;
   activeChatSubscription: Subscription;
   editingMessageId: string = "";
+  uploadedMedia: File | undefined;
+  previewImage: string | ArrayBuffer | null = null;
 
   chatId: string;
   chatName: string;
 
   @Input() userInfoDict:  { [id: string]: User };
   @ViewChild('autosize') autosize: CdkTextareaAutosize;
-  @ViewChild('textInput') textInput: ElementRef;
-  @ViewChild('chatPageContainer') chatScreen: ElementRef;
-  @ViewChild('chatHeader') chatHeader: ElementRef;
   @ViewChild('chatMessages') chatMessages: ElementRef;
 
   constructor(private chatpageService: ChatPageService, private chatTabService: ChatTabService){}
 
   ngOnInit(): void {
 
+    // get messages for new chat
     this.activeChatSubscription = this.chatTabService.activeChat.subscribe(newActiveChat => {
       this.chatId = newActiveChat.chatId
       this.chatName = newActiveChat.chatName
+      this.message = "";
+      this.editingMessageId = "",
+      this.uploadedMedia = undefined;
+      this.previewImage = null;
 
       this.chatpageService.getMessages(this.chatId).subscribe(response=>{
         this.chatHistory = response;
@@ -55,10 +58,16 @@ export class ChatPage implements AfterViewInit, OnDestroy, OnInit{
         this.stompSubscription.unsubscribe();
       }
 
+      // create new subscription  for messages and update accordingly when get new  message from server
       this.stompSubscription = this.chatpageService.changeSubscription(this.chatId).subscribe(message => {
         const messageObj: MessageResponse= JSON.parse(message.body)
         if(messageObj.type === "create"){
           this.chatHistory.push(messageObj)
+
+          // if the user is at bottom of chat page, scroll down when user receives a message so it can be shown properly
+          if(this.chatMessages.nativeElement.scrollTop === this.chatMessages.nativeElement.scrollHeight - this.chatMessages.nativeElement.clientHeight){
+            this.scrollToBottom()
+          }
         }
         else if(messageObj.type === "delete"){
           this.chatHistory = this.chatHistory.filter(message => message.id !== messageObj.id)
@@ -69,9 +78,7 @@ export class ChatPage implements AfterViewInit, OnDestroy, OnInit{
         }
       })
 
-      setTimeout(()=>{
-        this.chatMessages.nativeElement.scrollTop = this.chatMessages.nativeElement.scrollHeight;
-      }, 150)
+      this.scrollToBottom()
     })
   }
 
@@ -84,28 +91,12 @@ export class ChatPage implements AfterViewInit, OnDestroy, OnInit{
     this.activeChatSubscription.unsubscribe();
   }
 
-  ngAfterViewInit() {
-    // i need this setTimeout or else i get an error saying i changed a view
-    setTimeout(() => {
-      this.chatSize = this.chatScreen.nativeElement.offsetHeight - (this.chatHeader.nativeElement.offsetHeight) - (this.textInput.nativeElement.offsetHeight) ;
-    }, 100);
-  }
-
-  @HostListener('window:resize', ['$event'])
-  onResize(event?:Event) {
-    this.chatSize = this.chatScreen.nativeElement.offsetHeight - (this.chatHeader.nativeElement.offsetHeight) - (this.textInput.nativeElement.offsetHeight) ;
-  }
-
-  @Output() 
-  changeChatMessage(message?:Event):void{
-    // account for header, account for padding on y and border of input
-    this.chatSize = this.chatScreen.nativeElement.offsetHeight - (this.chatHeader.nativeElement.offsetHeight) - (this.textInput.nativeElement.offsetHeight) ;
-  }
 
   @Output()
   sendMessage():void{
 
-    if(this.chatId ===""){
+    // cant send in chat where nothing is selected or if there is no content
+    if(this.chatId ==="" || (this.message === "" && this.uploadedMedia === undefined)){
       return
     }
 
@@ -117,8 +108,16 @@ export class ChatPage implements AfterViewInit, OnDestroy, OnInit{
     }
 
     const uid = localStorage.getItem('uid') as string;
-    this.chatpageService.sendMessage(this.message, this.chatId, uid)
+    this.chatpageService.sendMessage(this.message, this.chatId, uid, this.uploadedMedia)
     this.message = "";
+    this.uploadedMedia = undefined;
+    this.previewImage = null;
+  }
+
+  scrollToBottom(){
+    setTimeout(()=>{
+      this.chatMessages.nativeElement.scrollTop = this.chatMessages.nativeElement.scrollHeight;
+    }, 150)
   }
 
   createMessageInput(chat: MessageResponse){
@@ -140,5 +139,16 @@ export class ChatPage implements AfterViewInit, OnDestroy, OnInit{
     }
 
     return inputLabel
+  }
+
+  onFileSelected(event: any){
+    this.uploadedMedia = event.target.files[0]
+
+    // create preview image
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.previewImage = reader.result;
+    };
+    reader.readAsDataURL(event.target.files[0]);
   }
 }

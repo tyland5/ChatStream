@@ -33,6 +33,7 @@ export interface MessageResponse{
     message: string,
     sentAt: number,
     chatId: string,
+    media: string, // url
     type: string
 }
 

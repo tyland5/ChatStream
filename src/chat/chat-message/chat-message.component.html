@@ -1,7 +1,7 @@
 <div>
     <div [ngClass]="{'bg-gray-600': highlightedMessage === true}" class="flex gap-[10px] mb-[20px] hover:bg-gray-600">
         <div>
-            <img class="h-[40px] w-[40px] bg-white rounded-full"/>
+            <img class="min-h-[40px] min-w-[40px] bg-white rounded-full"/>
         </div>
             
         <div>
@@ -29,6 +29,7 @@
             </div>
 
             <p class="text-base whitespace-pre dark:text-white">{{messageInfo.messageObj.message}}</p>
+            <img *ngIf="mediaUrl !== ''" [src]="mediaUrl" class="mt-[10px] max-h-[300px]"/> <!-- [ngClass]="{'max-h-[349px]': true, 'max-h-[350px]' : false}" -->
         </div>
     </div>
 </div>
