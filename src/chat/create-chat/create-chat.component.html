@@ -1,0 +1,30 @@
+<div class="">
+    <button class="mb-[16px]" mat-icon-button (click)="endCreateChat()">
+        <mat-icon class="dark:text-white" fontIcon="arrow_back"></mat-icon>
+    </button>
+
+    <input type="text" class="w-full border-2 p-1 rounded-lg text-base" (input)="filterFriendList($event)">
+
+    <div class="mb-[20px]">
+        <p class="text-sm dark:text-white">Add up to 4 other friends</p>
+
+        <div class="flex flex-wrap gap-[10px]">
+            <div *ngFor="let uid of selectedUsers" class="bg-gray-500 p-[10px] hover:cursor-pointer" (click)="modifySelectedUsers(uid)">
+                <p class="font-bold dark:text-white">{{friendMap[uid]}}   X</p>
+            </div>
+        </div>
+    </div>
+
+    <p class="font-bold dark:text-white mb-[10px]">Friend List</p>
+    <div *ngFor="let friend of filteredFriendList">
+        <userlist-element (changeSelection)="modifySelectedUsers($event)" [selected]="selectedUsers.has(friend.id)" id = "{{friend.id}}" name="{{friend.name}}" username="{{friend.username}}" pfp="{{friend.pfp}}"></userlist-element>
+    </div>
+
+
+    <div *ngIf="selectedUsers.size !== 0" class="absolute flex justify-center bottom-0 w-[calc(20%-13px)] min-w-[calc(240px-13px)] px-[10px] py-[10px] dark:bg-black">
+        <button class="p-[10px] aligh bg-purple-500 rounded-lg" (click)="createChat()">
+            <p class="dark:text-white">Create Chat</p>
+        </button>
+    </div>
+
+</div>

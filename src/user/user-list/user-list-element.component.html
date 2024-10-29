@@ -1,0 +1,14 @@
+
+<div  
+class="flex gap-[10px] items-center flex-nowrap text-ellipsis hover:bg-gray-600 mb-[16px] hover:cursor-pointer"
+(click)="userSelected()">
+    <img class="h-[40px] min-w-[40px] bg-white rounded-full"/>
+
+    <!-- https://stackoverflow.com/questions/36230944/prevent-flex-items-from-overflowing-a-container -->
+    <div class="min-w-0">
+        <p class="text-ellipsis overflow-hidden whitespace-nowrap dark:text-white">{{name}}</p>
+        <p class="text-ellipsis text-sm overflow-hidden whitespace-nowrap dark:text-gray-300">{{"@" + username}}</p>
+    </div>
+
+    <mat-checkbox class="ml-auto" color="primary" [checked]="selected"></mat-checkbox>
+</div>

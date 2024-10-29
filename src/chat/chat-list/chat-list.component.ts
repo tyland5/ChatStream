@@ -1,43 +1,50 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Component, OnInit, Input, Output, EventEmitter, OnDestroy} from '@angular/core';
 import { ChatPage } from '../chat-page/chat-page.component';
 import { ChatListElement } from '../chat-list-element/chat-list-element.component';
-import { ChatListService } from './chat-list.service';
 import { FinalChatListResponse, ChatListResponse, User, ActiveChat } from '../../interfaces/interfaces';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import {MatIconModule} from '@angular/material/icon';
+import { CreateChat } from "../create-chat/create-chat.component";
+import { ChatTabService } from '../chat-tab/chat-tab.service';
+import { Subscription } from 'rxjs';
 
 @Component({
-  selector: 'forgot-password',
+  selector: 'chat-list',
   standalone: true,
-  imports: [ChatPage, ChatListElement, CommonModule],
+  imports: [ChatPage, ChatListElement, CommonModule, MatIconModule, FormsModule, CreateChat],
   templateUrl: './chat-list.component.html'
 })
-export class ChatList implements OnInit{
+export class ChatList implements OnInit, OnDestroy{
   
+  @Input() userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
+  activeChat: ActiveChat = {chatId: "", chatName: ""}
+  creatingNewChat: boolean = false
   chatList: ChatListResponse[] = []
-  userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
-  activeChatId: string = ""
-  activeChatName: string = ""
+  chatListSubscription: Subscription;
+  activeChatSubscription: Subscription;
 
-  constructor(private chatlistService: ChatListService){}
-  
+  constructor(private chatTabService: ChatTabService){}
+
   ngOnInit(): void {
-    this.chatlistService.getChatlist().subscribe(chatList=>{
-      if(chatList){
-        const users = (chatList as FinalChatListResponse).users
-        users.forEach(user => {
-          this.userInfoDict[user.id] = user 
-        });
-
-        this.chatList = (chatList as FinalChatListResponse).chatlist
-      }
+    this.chatListSubscription = this.chatTabService.chatList.subscribe(newChatList => {
+      this.chatList = newChatList
     })
+
+    this.activeChatSubscription = this.chatTabService.activeChat.subscribe(newActiveChat => {
+      this.activeChat = newActiveChat
+    })
+  }
+
+  ngOnDestroy(): void {
+    this.chatListSubscription.unsubscribe()
+    this.activeChatSubscription.unsubscribe()
   }
 
   // helper function for ngFor of chatlist element
   getChatName(chat: ChatListResponse): string{
     if(chat.members.length > 2){
-      return "GROUP CHAT PLACEHOLDER NAME"
+      return chat.chatName as string
     }
 
     const selfUid = localStorage.getItem("uid")
@@ -55,6 +62,9 @@ export class ChatList implements OnInit{
 
   // i need this?? passing chat.latestMessage doesn't working in input in this component.html
   getLatestMessage(chat: ChatListResponse){
+    if(chat.latestMessage === null){
+      return {name: "", message: ""}
+    }
     const senderName: string = this.userInfoDict[chat.latestMessage.uid].name
     return {name: senderName, message:chat.latestMessage.message}
   }
@@ -63,10 +73,11 @@ export class ChatList implements OnInit{
     return chat.id
   }
 
-  changeActiveChatId(event: ActiveChat){
-    console.log("ACTIVE CHANGED TO ")
-    console.log(event)
-    this.activeChatId = event.chatId
-    this.activeChatName = event.chatName
+  closeCreateChat(newActiveChatId: string){
+    this.creatingNewChat = false
+
+    if(newActiveChatId === ""){
+      return
+    }
   }
 }

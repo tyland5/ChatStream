@@ -28,10 +28,13 @@ export interface FinalChatListResponse{
 }
 
 export interface MessageResponse{
+    id: string,
     sender: string,
     message: string,
-    sentAt: string,
-    chatId: string
+    sentAt: number,
+    chatId: string,
+    media: string, // url
+    type: string
 }
 
 export interface ActiveChat{

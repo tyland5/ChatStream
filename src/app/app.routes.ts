@@ -1,6 +1,5 @@
 import { Routes} from '@angular/router';
-import { AppComponent } from './app.component';
-import { LoginRoutes } from '../login/login-form/login.routes';
+import { ChatTabService } from '../chat/chat-tab/chat-tab.service';
 
 export const routes: Routes = [
     {path:'', redirectTo:'home', pathMatch: 'full'},
@@ -9,6 +8,7 @@ export const routes: Routes = [
         loadChildren: () => import('../login/login-form/login.routes').then(mod=> mod.LoginRoutes)
     },
     {path:'chat-tab',
-        loadComponent: () => import('../chat/chat-list/chat-list.component').then(mod => mod.ChatList)
+        providers: [ChatTabService],
+        loadComponent: () => import('../chat/chat-tab/chat-tab.component').then(mod => mod.ChatTab)
     }
 ];

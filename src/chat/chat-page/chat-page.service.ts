@@ -1,40 +1,63 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Subject } from 'rxjs';
-import { MessageResponse } from '../../interfaces/interfaces';
+import { Subject, Observable} from 'rxjs';
+import { ChatListResponse, MessageResponse } from '../../interfaces/interfaces';
+import { RxStompService, RxStompServiceBase } from '../../global-services/rxstomp.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatPageService {
-    constructor(private http:HttpClient){}
+    rxStomp: RxStompServiceBase;
 
-    sendMessage(message: string, chatId: string, sender:string, sentAt:string){
-        let messageSent = new Subject<boolean>();
-        let csrf = localStorage.getItem("csrf");
-        
-        if (csrf == null){
-          csrf = ""
-        }
+    constructor(private http:HttpClient, private rxStompService: RxStompService){
+      // setup the stomp service
+      this.rxStomp = this.rxStompService.getConnection()
+    }
 
-        const headerDict = new HttpHeaders({
-          'csrf': csrf,
-          'Content-Type': 'application/json'
-        })
+    changeSubscription(chatId: string){
+      return this.rxStomp.watch("/chat/" + chatId);
+    }
 
-        this.http.post('http://localhost:8080/send-message', {message: message, chatId: chatId, sender:sender, sentAt:sentAt}, 
-          {responseType:"json", withCredentials: true, headers: headerDict}).subscribe(response => {
-          messageSent.next(true)
-        });
+    deactivateStompService(){
+      this.rxStomp.deactivate();
+    }
 
-        return messageSent.asObservable();
+    sendMessage(message: string, chatId: string, sender:string, media:File|undefined){
+      const sentAt = Date.now()
+
+      if(media !== undefined){
+        const mediaExtension = media.name.split(".").at(-1)
+       
+        const mediaName = sender + "msg_" + sentAt.toString() + "." + mediaExtension
+        const reader = new FileReader();
+        reader.onload = () => {
+          const base64 = reader.result as string;
+          this.http.post<Object>("http://localhost:8080/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: base64, mediaName: mediaName}, {responseType:"json", withCredentials: true})
+          .subscribe(response => {
+            this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body:JSON.stringify({...response})});
+          })
+        };
+        reader.readAsDataURL(media);
+
+        return
+      }
+
+      this.http.post<Object>("http://localhost:8080/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: "", mediaName: ""}, {responseType:"json", withCredentials: true})
+      .subscribe(response => {
+        this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body:JSON.stringify({...response})});
+      })
+    }
+
+    // type can only be edit or delete
+    updateMessage(messageId: string, message: string, chatId: string, type: string){
+      this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body: JSON.stringify({ id: messageId, message: message, chatId: chatId, type: type}) });
     }
 
     getMessages(chatId: string){
       const chatMessages = new Subject<MessageResponse[]>();
 
       this.http.get<MessageResponse[]>('http://localhost:8080/get-messages', {responseType:"json", withCredentials: true, params:{chatId:chatId}}).subscribe(messages =>{
-        console.log(messages)
         chatMessages.next(messages)
       })
 
