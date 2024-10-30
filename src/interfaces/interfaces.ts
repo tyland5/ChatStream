@@ -1,6 +1,9 @@
 export interface LoginJsonResponse{
     csrf:string,
-    uid: string
+    uid: string,
+    pfp: string,
+    username: string,
+    name: string
 }
 
 export interface ChatListResponse{
@@ -19,7 +22,7 @@ export interface User{
     username: string,
     name: string,
     pfp: string,
-    password: string
+    password?: string
 }
 
 export interface FinalChatListResponse{

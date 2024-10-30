@@ -21,9 +21,10 @@ export class LoginFormService {
             return throwError("invalid credentials")
         }))
         .subscribe((response: LoginJsonResponse) => {
-            isValid.next(true) // you publish changes to the subscriber
             localStorage.setItem("csrf", response.csrf)
             localStorage.setItem("uid", response.uid)
+            localStorage.setItem("uinfo", JSON.stringify({name: response.name, username: response.username, pfp: response.pfp}))
+            isValid.next(true) // you publish changes to the subscriber
         });
 
         return isValid.asObservable();

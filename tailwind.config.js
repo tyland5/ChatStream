@@ -11,7 +11,8 @@ module.exports = {
     "./src/chat/chat-list-element/chat-list-element.component.{html,ts}",
     "./src/user/user-list/user-list-element.component.{html,ts}",
     "./src/chat/create-chat/create-chat.component.{html,ts}",
-    "./src/chat/chat-tab/chat-tab.component.{html,ts}"
+    "./src/chat/chat-tab/chat-tab.component.{html,ts}",
+    "./src/user/profile/profile.component.{html,ts}"
   ],
   theme: {
     extend: {},
