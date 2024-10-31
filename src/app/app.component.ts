@@ -3,6 +3,7 @@ import { RouterOutlet, RouterLink, Router } from '@angular/router';
 import { LoginForm } from '../login/login-form/login-form.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { PersonalUserInfoService } from '../global-services/personalUserinfo.service';
 
 
 @Component({
@@ -17,9 +18,10 @@ export class AppComponent {
   loggedIn: boolean = false; // this will also be used to conditionally render our header
   pfp: string;
 
-  constructor(private router: Router){
-    const uinfo: {pfp:string} = JSON.parse(localStorage.getItem('uinfo') as string)
-    this.pfp = uinfo.pfp
+  constructor(private router: Router, private personalUserInfo: PersonalUserInfoService){    
+    this.personalUserInfo.userPfp.subscribe(newPfp => {
+      this.pfp = newPfp
+    })
   }
 
   navigateTo(routeName: string){
