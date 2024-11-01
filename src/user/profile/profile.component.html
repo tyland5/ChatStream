@@ -1,0 +1,52 @@
+<div class="mt-[20px] flex flex-col items-center" *ngIf="!editingImage">
+  
+  <input type="file" #fileInput (change)="onFileChange($event)" class="hidden"/>
+  
+  <div (click)="fileInput.click()" (mouseenter)="hoveredPfp=true" (mouseleave)="hoveredPfp=false" class="relative h-[150px] w-[150px] rounded-full mb-[20px] hover:cursor-pointer">
+    <img [src]="newPfp != '' ? newPfp : userInfo.pfp" class="bg-white h-[150px] w-[150px] rounded-full object-cover" />
+    <div *ngIf="hoveredPfp" class="absolute top-0 h-[150px] w-[150px] rounded-full bg-gray-800 opacity-80">
+      <mat-icon class="absolute translate-x-[-50%] translate-y-[-50%] top-1/2 left-1/2 text-white" fontIcon="edit"></mat-icon>
+    </div>
+  </div>
+
+  <div class="w-1/2 min-w-[300px] max-w-[500px]  grid grid-cols-[auto_minmax(0px,_1fr)] grid-rows-[auto_auto] gap-[20px] mb-[20px]">
+    
+    <p class="col-start-1 col-span-1 row-start-1 row-span-1 dark:text-white text-lg">Display Name</p>
+    <div class="col-start-2 col-span-1 row-start-1 row-span-1">
+      <input type="text" class="w-full p-[5px] rounded-md" [(ngModel)]="userInfo.name" (input)="infoSaved = false"/>
+      <p *ngIf="userInfo.name === ''" class="text-red-500">Display name required</p>
+    </div>
+    
+    <p class="col-start-1 col-span-1 row-start-2 row-span-1 dark:text-white text-lg">Username</p>
+    <div class="col-start-2 col-span-1 row-start-2 row-span-1">
+      <input type="text" (keypress)="checkIfValidChar($event)" class="w-full p-[5px] rounded-md" [(ngModel)]="userInfo.username" (input)="infoSaved = false"/>
+      <p *ngIf="userInfo.username === ''" class="text-red-500">Username required</p>
+      <p *ngIf="usernameUnavailableErr" class="text-red-500">Username unavailable</p>
+    </div>
+  
+  </div>
+  
+  <button class="bg-purple-400 text-lg py-3 px-6 rounded-lg block mb-4 dark:text-white hover:bg-purple-500" (click)="saveProfileChanges()">Update Info</button>
+  <p *ngIf="infoSaved" class="font-bold text-green-400">User info saved</p>
+</div>
+
+
+<div class="mt-[20px] flex flex-col items-center justify-center h-full" *ngIf="editingImage">
+  <!-- hideResizeSquares	boolean	false	Disables the resize-squares at the border of the cropper. 
+   This is mostly useful for Touch Devices where you can change the Size of the Cropper via Pinch-To-Zoom-->
+   <div class="relative">
+    <image-cropper
+      class=" sm:h-[300px] h-[200px]"
+      [imageChangedEvent]="imageChangedEvent"
+      format="png"
+      [aspectRatio]="1/1"
+      (imageCropped)="onImageCropped($event)"
+      [roundCropper]="true"
+    ></image-cropper>
+   </div>
+
+   <div class="flex gap-[20px] mt-[30px]">
+    <button class="bg-gray-400 text-lg py-3 px-6 rounded-lg block mb-4 dark:text-white hover:bg-purple-500" (click)="cancelPfpChange()">Cancel</button>
+    <button class="bg-purple-400 text-lg py-3 px-6 rounded-lg block mb-4 dark:text-white hover:bg-purple-500" (click)="savePfpChange()">Save Change</button>
+   </div>
+</div>

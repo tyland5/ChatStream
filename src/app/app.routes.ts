@@ -10,5 +10,6 @@ export const routes: Routes = [
     {path:'chat-tab',
         providers: [ChatTabService],
         loadComponent: () => import('../chat/chat-tab/chat-tab.component').then(mod => mod.ChatTab)
-    }
+    },
+    {path:'profile', loadComponent: ()=> import('../user/profile/profile.component').then(mod=> mod.Profile)}
 ];

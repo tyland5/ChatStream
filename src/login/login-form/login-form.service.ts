@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Subject, pipe, catchError, throwError} from 'rxjs';
 import { LoginJsonResponse } from '../../interfaces/interfaces';
+import { PersonalUserInfoService } from '../../global-services/personalUserinfo.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class LoginFormService {
-    constructor(private http:HttpClient){}
+    constructor(private http:HttpClient, private personalUserInfoService: PersonalUserInfoService){}
 
     checkCredentials(uname: string, pw: string){
         let isValid = new Subject<boolean>();
@@ -21,9 +22,11 @@ export class LoginFormService {
             return throwError("invalid credentials")
         }))
         .subscribe((response: LoginJsonResponse) => {
-            isValid.next(true) // you publish changes to the subscriber
             localStorage.setItem("csrf", response.csrf)
             localStorage.setItem("uid", response.uid)
+            localStorage.setItem("uinfo", JSON.stringify({name: response.name, username: response.username, pfp: response.pfp}))
+            this.personalUserInfoService.updateUserPfp(response.pfp)
+            isValid.next(true) // you publish changes to the subscriber
         });
 
         return isValid.asObservable();
