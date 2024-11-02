@@ -47,8 +47,6 @@ export class ChatListService {
         // first create a new row in the table
         this.http.post<ChatListResponse>("http://localhost:8080/create-chat", {chatMembers: chatMembers}, {responseType:"json", withCredentials: true})
         .subscribe(newChat => {
-          console.log("NEW CHAT CREATED WITH DETAILS")
-          console.log(newChat)
           chatMembers.forEach(member => {
             this.rxStomp.publish({destination: '/chatlist/updateChatlist/' + member,  body: JSON.stringify(newChat)})
           })

@@ -50,8 +50,8 @@ export class ChatPageService {
     }
 
     // type can only be edit or delete
-    updateMessage(messageId: string, message: string, chatId: string, type: string){
-      this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body: JSON.stringify({ id: messageId, message: message, chatId: chatId, type: type}) });
+    updateMessage(messageId: string, message: string, chatId: string, type: string, mediaName: string = ""){
+      this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body: JSON.stringify({ id: messageId, message: message, chatId: chatId, type: type, mediaName: mediaName}) });
     }
 
     getMessages(chatId: string){

@@ -9,7 +9,7 @@
         </div>
 
         <div *ngFor="let chat of chatList">
-            <chatlist-element [chatName]="getChatName(chat)" [chatId]="getChatId(chat)" [isActive]="chat.id === activeChat.chatId" [latestMessage]="getLatestMessage(chat)" ></chatlist-element>
+            <chatlist-element [chatName]="getChatName(chat)" [chatPic]="getChatPic(chat)" [chatId]="getChatId(chat)" [isActive]="chat.id === activeChat.chatId" [latestMessage]="getLatestMessage(chat)" ></chatlist-element>
         </div>
     </div>
 

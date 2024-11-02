@@ -60,6 +60,25 @@ export class ChatList implements OnInit, OnDestroy{
     return chatName
   }
 
+  getChatPic(chat: ChatListResponse): string{
+    if(chat.members.length > 2){
+      return chat.chatPic as string
+    }
+
+    const selfUid = localStorage.getItem("uid") as string
+    let chatPic: string = ""
+
+    // find the other user's pfp
+    chat.members.forEach(userId => {
+      if(userId != selfUid){
+        chatPic = this.userInfoDict[userId].pfp
+      }
+    });
+
+    return chatPic
+
+  }
+
   // i need this?? passing chat.latestMessage doesn't working in input in this component.html
   getLatestMessage(chat: ChatListResponse){
     if(chat.latestMessage === null){

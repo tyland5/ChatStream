@@ -11,7 +11,8 @@ export interface ChatListResponse{
     members: string[],
     latestMessage: {
         uid: string,
-        message: string
+        message: string,
+        messageId: string,
     },
     chatName ?: string,
     chatPic ?: string

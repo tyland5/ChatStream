@@ -34,7 +34,7 @@ export class ChatMessage{
 
   deleteMessage(){
     const message = this.messageInfo.messageObj
-    this.chatPageService.updateMessage(message.id, message.message, message.chatId, "delete")
+    this.chatPageService.updateMessage(message.id, message.message, message.chatId, "delete", message.media)
   }
 
   emitEditingMessageId(){
