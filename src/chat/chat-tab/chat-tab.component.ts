@@ -35,6 +35,7 @@ export class ChatTab implements OnInit, OnDestroy{
   ngOnInit(): void {
 
     // need this for createChatSubscription (to update chat list properly when using chat publish subscribe websocket)
+    // initializes chat list var here with the observable
     this.chatListSubscription = this.chatTabService.chatList.subscribe(newChatList => {
       this.chatList = newChatList
     })
@@ -45,6 +46,7 @@ export class ChatTab implements OnInit, OnDestroy{
       this.createChatSubscription(newChat)
     })
 
+    // initalizes the observable chatlist that can be viewed in all components of chat tab
     this.chatlistService.getChatlist().subscribe((finalChatListResponse: FinalChatListResponse)=>{
       if(finalChatListResponse){
         const users = finalChatListResponse.users
@@ -79,17 +81,27 @@ export class ChatTab implements OnInit, OnDestroy{
     // create observable for this component and chat page component first
     const chatPubSub = this.chatPageService.changeSubscription(chat.id)
 
+    // whenever a message update comes from a chat, check if you need to update the chatlist element (moving it on top or updating recent message)
     const chatSub = chatPubSub.subscribe(message => {
       const messageObj: MessageResponse= JSON.parse(message.body)
-      
-      // if someone edits or delete a message, we dont want the chat to appear at the top since not important
-      if(messageObj.type !== "create"){
+      const index = this.chatList.findIndex((chat) => chat.id === messageObj.chatId)
+
+      // if message was edited or deleted and was not the most recent, we dont care about updating chatlist
+      if(messageObj.type !== "create" && messageObj.id !== this.chatList[index].latestMessage.messageId){
         return
       }
 
-      const index = this.chatList.findIndex((chat) => chat.id === messageObj.chatId)
-      this.chatList[index] = {...this.chatList[index], latestMessage:{uid: messageObj.sender, message: messageObj.message}}
-      this.chatTabService.updateChatList([this.chatList[index], ...this.chatList.slice(0, index), ...this.chatList.slice(index+1)]) // slice handles out of bounds 
+      const messageProperty = messageObj.type === "delete" ? "Message Deleted" : messageObj.message
+      const senderIdProperty = messageObj.type === "create" ? messageObj.sender : this.chatList[index].latestMessage.uid
+      this.chatList[index] = {...this.chatList[index], latestMessage:{uid: senderIdProperty, message: messageProperty, messageId: messageObj.id}}
+
+      // if someone edits or delete a message, we dont want the chat to appear at the top since not important
+      if(messageObj.type === "create"){
+        this.chatTabService.updateChatList([this.chatList[index], ...this.chatList.slice(0, index), ...this.chatList.slice(index+1)]) // slice handles out of bounds 
+      }
+      else{
+        this.chatTabService.updateChatList([...this.chatList])
+      }
     })
 
     this.chatSubscriptions.push(chatSub)
