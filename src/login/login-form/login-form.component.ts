@@ -1,20 +1,21 @@
 import { Component} from '@angular/core';
 import { RouterOutlet, RouterLink } from '@angular/router';
-import { ForgotPassword } from '../forgot-password/forgot-password.component';
 import { LoginFormService } from './login-form.service';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'login-form',
   standalone: true,
-  imports: [ForgotPassword, RouterLink, FormsModule],
+  imports: [FormsModule, RouterLink, CommonModule],
   templateUrl: './login-form.component.html',
 })
 export class LoginForm {
 
   username: string = ""
   password: string = ""
+  showIncorrectCred = false
 
   constructor(private loginService: LoginFormService, private router: Router){}
 
@@ -24,7 +25,7 @@ export class LoginForm {
         this.router.navigate(['/chat-tab']);
       }
       else{
-        console.log("invalid credentials")
+        this.showIncorrectCred = true;
       }
     })
   }

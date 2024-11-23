@@ -6,8 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { ProfileService } from './profile.service';
 import { ImageCropperComponent, ImageCroppedEvent, LoadedImage, ImageTransform } from 'ngx-image-cropper';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
-import { PersonalUserInfoService } from '../../global-services/personalUserinfo.service';
 import { User } from '../../interfaces/interfaces';
+import { CreateAccountService } from '../../login/create-account/create-account.service';
 
 @Component({
   selector: 'app-root',
@@ -27,7 +27,7 @@ export class Profile implements OnInit{
   newPfp: SafeUrl = ''; // for displaying on profile 
   newPfpBase64: string = ''; // this is base4 of cropped new pfp thats sent to backend
 
-  constructor(private profileService: ProfileService, private sanitizer: DomSanitizer, private personalUserInfoService: PersonalUserInfoService){}
+  constructor(private profileService: ProfileService, private sanitizer: DomSanitizer, private registerService: CreateAccountService ){}
 
   ngOnInit(): void {
     this.userInfo = JSON.parse(localStorage.getItem('uinfo') as string)
@@ -81,7 +81,7 @@ export class Profile implements OnInit{
     }
 
     // check if username is valid. if it is, then update user info in db
-    this.profileService.checkUsernameAvailable(this.userInfo.username).subscribe(isAvailable=>{
+    this.registerService.checkUsernameAvailable(this.userInfo.username).subscribe(isAvailable=>{
       if(!isAvailable){
         this.usernameUnavailableErr = true
         return

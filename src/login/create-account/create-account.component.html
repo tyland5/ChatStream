@@ -1,7 +1,44 @@
-<main class="main">
-  <div class="content">
+<div class="flex flex-col items-center pt-[20px] gap-[20px]" *ngIf="!infoChecked">
     <!--Here we can put logic to show if user is logged in??-->
-    <p>Create Account Page</p>
-    <a routerLink="/login">login</a>
-  </div>
-</main>
+    <p class="text-lg font-bold dark:text-white">Create Account</p>
+
+    <div class="w-[300px]">
+      <p class="text-base dark:text-white">Username</p>
+      <input type="text" (keypress)="checkIfValidChar($event)" class=" min-w-[300px] w-2/5 p-[4px] rounded-lg text-base" (input)="changeUsername($event)">
+      <p *ngIf="showUsernameErr" class="text-base text-red-600">Lowercase letters, numbers, periods, & underscores allowed. 1-32 characters</p>
+      <p class="text-base text-red-600" *ngIf="showUsernameUsedErr">Username unavailable</p>
+    </div>
+
+    <div class="w-[300px]">
+      <p class="text-base dark:text-white">Display Name</p>
+      <input (keypress)="checkDisplayNameLength($event)" type="text" class=" min-w-[300px] w-2/5 p-[4px] rounded-lg text-base" [(ngModel)]="name">
+      <p *ngIf="showNameErr" class="text-base text-red-600">1-32 characters are required</p>
+    </div>
+
+    <div class="w-[300px]">
+      <p class="text-base dark:text-white">Email</p>
+      <input type="text" class=" min-w-[300px] w-2/5 p-[4px] rounded-lg text-base" [(ngModel)]="email">
+      <p *ngIf="showEmailErr" class="text-base text-red-600 ">Enter a proper email</p>
+      <p *ngIf="showEmailUsedErr" class="text-base text-red-600 ">Email already in use</p>
+    </div>
+
+    <div class="w-[300px]">
+      <p class="text-base dark:text-white">Password</p>
+      <input type="password" class=" min-w-[300px] w-2/5 p-[4px] rounded-lg text-base" [(ngModel)]="password">
+      <p class="text-base text-red-600 whitespace-pre-line" *ngIf="showPasswordErr">
+        {{"At least one lowercase alphabet i.e. [a-z]\nAt least one uppercase alphabet i.e. [A-Z]\nAt least one Numeric digit i.e. [0-9]\nAt least one special character i.e. ['@', '$', '.', '#', '!', '%', '*', '?', '&', '^']\nTotal length must be in the range [8-16]"}}
+      </p>
+    </div>
+
+    <div class="w-[300px]">
+      <p class="text-base dark:text-white">Confirm Password</p>
+      <input type="password" class=" min-w-[300px] w-2/5 p-[4px] rounded-lg text-base" [(ngModel)]="confirmPassword">
+      <p class="text-base text-red-600" *ngIf="showConfirmPasswordErr">Passwords do not match</p>
+    </div>
+
+    <button class="bg-purple-400 text-lg py-3 px-6 rounded-lg block mb-4 dark:text-white hover:bg-purple-500" (click)="checkUserInfo()">Register</button>
+</div>
+
+<div *ngIf="infoChecked">
+  <email-verification [recipientEmail]="email" [purpose]="'register'" (codeCheckResult)="createUser($event)"></email-verification>
+</div>
