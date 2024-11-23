@@ -61,4 +61,17 @@ import { Router} from "@angular/router";
 
       return canActivate.asObservable();
     }
+
+    logoutUser(){
+      let signedOut = new Subject<boolean>();
+
+      this.http.delete<boolean>('http://localhost:8080/logout', {withCredentials: true, responseType: "json"}).subscribe(succesfullyLoggedOut =>{
+          if(succesfullyLoggedOut){
+              this.updateLoggedIn(false)
+          }
+          signedOut.next(succesfullyLoggedOut)
+      })
+
+      return signedOut.asObservable();
+  }
   }

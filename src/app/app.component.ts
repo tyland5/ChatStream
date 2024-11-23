@@ -19,7 +19,7 @@ export class AppComponent {
   loggedIn: boolean = false; // this will also be used to conditionally render our header
   pfp: string;
 
-  constructor(private router: Router, private personalUserInfoService: PersonalUserInfoService, private loginService: LoginFormService){    
+  constructor(private router: Router, private personalUserInfoService: PersonalUserInfoService){    
     this.personalUserInfoService.userPfp.subscribe(newPfp => {
       this.pfp = newPfp
     })
@@ -33,7 +33,7 @@ export class AppComponent {
   }
 
   logout(){
-    this.loginService.logoutUser().subscribe(loggedOut => {
+    this.personalUserInfoService.logoutUser().subscribe(loggedOut => {
       this.personalUserInfoService.updateLoggedIn(false)
       localStorage.clear()
       this.router.navigate(['/login'])
