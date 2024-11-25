@@ -1,0 +1,48 @@
+<div class="flex flex-col items-center pt-[30px] px-[16px]">
+    <div class="w-full max-w-[500px] mb-[32px]">
+        <p class="font-bold text-base dark:text-white">Add Friend</p>
+        <label for="friendInput" class="text-base dark:text-white">Enter Username</label>
+        
+        <div class="w-full flex">
+            <input type="text" id="friendInput" [(ngModel)]="username" class="flex-1 p-[5px] rounded-md"/>
+            <button (click)="searchUser()" class="bg-purple-400 ml-[10px] text-base h-full py-1 px-3 rounded-lg block dark:text-white hover:bg-purple-500">Add</button>
+        </div>
+
+        <p *ngIf="userNonexistentErr" class="text-base text-red-600">User does not exist</p>
+        <p *ngIf="alreadyFriendsErr" class="text-base text-red-600">Already friends</p>
+        <p *ngIf="alreadyPendingErr" class="text-base text-red-600">Request already pending</p>
+    </div>
+    
+    <div class="w-full max-w-[500px]">
+        <mat-expansion-panel [(expanded)]="panelOpenState">
+            <mat-expansion-panel-header>
+            <mat-panel-title>{{selectedView}}</mat-panel-title>
+            </mat-expansion-panel-header>
+            
+            <p (click)="panelOpenState=false; selectedView = 'Friends'" class="text-base dark:text-white mb-[16px] hover:cursor-pointer">Friends</p>
+            <p (click)="panelOpenState=false; selectedView = 'Incoming Requests'" class="text-base dark:text-white mb-[16px] hover:cursor-pointer">Incoming Requests ({{incomingRequests.length}})</p>
+            <p (click)="panelOpenState=false; selectedView = 'Outgoing Requests'" class="text-base dark:text-white hover:cursor-pointer">Outgoing Requests ({{outgoingRequests.length}})</p>
+        </mat-expansion-panel>
+
+        <div class="h-[16px]"></div>
+
+        <div *ngIf="selectedView === 'Friends'">
+            <div *ngFor="let friend of friendList" class="mb-[24px]">
+                <userlist-element id = "{{friend.id}}" name="{{friend.name}}" username="{{friend.username}}" pfp="{{friend.pfp}}"></userlist-element>
+            </div>
+        </div>
+
+        <div *ngIf="selectedView === 'Incoming Requests'">
+            <div *ngFor="let user of incomingRequests" class="mb-[24px]">
+                <userlist-element id = "{{user.id}}" name="{{user.name}}" username="{{user.username}}" pfp="{{user.pfp}}" [inIncomingRequest]="true" 
+                (confirmClicked)="handleConfirmClicked($event)" (cancelClicked)="handleCancelClicked($event, true)"></userlist-element>
+            </div>
+        </div>
+
+        <div *ngIf="selectedView === 'Outgoing Requests'">
+            <div *ngFor="let user of outgoingRequests" class="mb-[24px]">
+                <userlist-element [id]="user.id" [name]="user.name" [username]="user.username" [pfp]="user.pfp" [inOutgoingRequest]="true" (cancelClicked)="handleCancelClicked($event, false)"></userlist-element>
+            </div>
+        </div>
+    </div>
+</div> 

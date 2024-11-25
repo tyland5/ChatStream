@@ -63,7 +63,7 @@ export class ChatTab implements OnInit, OnDestroy{
       }
     })
 
-    this.friendsService.getFriends(localStorage.getItem('uid') as string).subscribe(friendList => {
+    this.friendsService.getFriends().subscribe(friendList => {
       this.chatTabService.updateFriendList(friendList)
     })
   }
