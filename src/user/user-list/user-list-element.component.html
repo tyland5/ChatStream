@@ -1,6 +1,6 @@
 
 <div  
-class="flex gap-[10px] items-center flex-nowrap text-ellipsis hover:bg-gray-600 mb-[16px] hover:cursor-pointer"
+class="flex gap-[10px] items-center flex-nowrap text-ellipsis hover:bg-gray-600 hover:cursor-pointer"
 (click)="userSelected()">
     <img class="h-[40px] min-w-[40px] bg-white rounded-full" [src]="pfp"/>
 
@@ -10,5 +10,9 @@ class="flex gap-[10px] items-center flex-nowrap text-ellipsis hover:bg-gray-600 
         <p class="text-ellipsis text-sm overflow-hidden whitespace-nowrap dark:text-gray-300">{{"@" + username}}</p>
     </div>
 
-    <mat-checkbox class="ml-auto" color="primary" [checked]="selected"></mat-checkbox>
+    <mat-checkbox class="ml-auto" *ngIf="inCreateChat" color="primary" [checked]="selected"></mat-checkbox>
+    <div *ngIf="inIncomingRequest || inOutgoingRequest" class="ml-auto">
+        <mat-icon *ngIf="inIncomingRequest || inOutgoingRequest" class="text-red-600 mr-[10px]" fontIcon="cancel" (click)="handleCancelClicked()"></mat-icon>
+        <mat-icon *ngIf="inIncomingRequest" class="text-green-500" fontIcon="check_circle" (click)="handleConfirmClicked()"></mat-icon>
+    </div>
 </div>

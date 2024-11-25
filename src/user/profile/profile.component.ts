@@ -10,7 +10,7 @@ import { User } from '../../interfaces/interfaces';
 import { CreateAccountService } from '../../login/create-account/create-account.service';
 
 @Component({
-  selector: 'app-root',
+  selector: 'profile',
   standalone: true,
   imports: [MatIconModule, MatMenuModule, CommonModule, FormsModule, ImageCropperComponent],
   templateUrl: './profile.component.html',

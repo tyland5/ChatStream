@@ -16,8 +16,8 @@
     </div>
 
     <p class="font-bold dark:text-white mb-[10px]">Friend List</p>
-    <div *ngFor="let friend of filteredFriendList">
-        <userlist-element (changeSelection)="modifySelectedUsers($event)" [selected]="selectedUsers.has(friend.id)" id = "{{friend.id}}" name="{{friend.name}}" username="{{friend.username}}" pfp="{{friend.pfp}}"></userlist-element>
+    <div *ngFor="let friend of filteredFriendList" class="mb-[16px]">
+        <userlist-element (changeSelection)="modifySelectedUsers($event)" [inCreateChat]="true" [selected]="selectedUsers.has(friend.id)" id = "{{friend.id}}" name="{{friend.name}}" username="{{friend.username}}" pfp="{{friend.pfp}}"></userlist-element>
     </div>
 
 
