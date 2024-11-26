@@ -4,6 +4,7 @@ import { User } from "../interfaces/interfaces";
 import { HttpClient } from "@angular/common/http";
 import { Subject } from "rxjs";
 import { Router} from "@angular/router";
+import { environment } from "../environments/environment";
 
 @Injectable({
     providedIn: 'root',
@@ -33,8 +34,9 @@ import { Router} from "@angular/router";
 
     checkLoggedIn(path: string){
       const canActivate = new Subject<boolean>();
-      this.http.get<boolean>('http://localhost:8080/check-logged-in', {responseType:"json", withCredentials: true}).subscribe(sessionExists=>{
-        
+      this.http.get<{loggedIn:boolean}>(environment.apiBaseUrl + '/check-logged-in', {responseType:"json", withCredentials: true}).subscribe(response=>{
+        const sessionExists = response.loggedIn
+
         // if user not logged in and at login, let them go. we need to flip the boolean
         const isLoggedIn = path === "login" ? !sessionExists : sessionExists
         canActivate.next(isLoggedIn)
@@ -65,7 +67,7 @@ import { Router} from "@angular/router";
     logoutUser(){
       let signedOut = new Subject<boolean>();
 
-      this.http.delete<boolean>('http://localhost:8080/logout', {withCredentials: true, responseType: "json"}).subscribe(succesfullyLoggedOut =>{
+      this.http.delete<boolean>(environment.apiBaseUrl + '/logout', {withCredentials: true, responseType: "json"}).subscribe(succesfullyLoggedOut =>{
           if(succesfullyLoggedOut){
               this.updateLoggedIn(false)
           }

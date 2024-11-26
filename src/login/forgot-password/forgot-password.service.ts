@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Subject } from "rxjs";
+import { environment } from "../../environments/environment";
 
 @Injectable({
     providedIn: 'root',
@@ -11,7 +12,7 @@ export class ForgotPasswordService {
     changePassword(email:string, password: string){
         const passwordChanged = new Subject<boolean>()
 
-        this.http.put<{updated:boolean}>('http://localhost:8080/change-password', {email:email, password:password}, {responseType:"json"})
+        this.http.put<{updated:boolean}>(environment.apiBaseUrl + '/change-password', {email:email, password:password}, {responseType:"json"})
         .subscribe(response=>{
             passwordChanged.next(response.updated)
         })

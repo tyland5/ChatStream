@@ -32,7 +32,8 @@ export class ChatListService {
         }))
         
         .subscribe((response2)=>{
-            retrievedChatList.next({chatlist: chatList as ChatListResponse[], users: response2 as User[]})
+            const users = (response2 as {uinfo:User[]}).uinfo
+            retrievedChatList.next({chatlist: chatList as ChatListResponse[], users:users})
         })
         
         return retrievedChatList.asObservable();

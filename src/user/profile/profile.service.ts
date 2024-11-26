@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subject } from 'rxjs';
 import { User } from '../../interfaces/interfaces';
 import { PersonalUserInfoService } from '../../global-services/personalUserinfo.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ export class ProfileService {
       const infoUpdated = new Subject<boolean>();
 
       if(userInfo){
-        this.http.put<{newPfpUrl:string}>('http://localhost:8080/update-profile', {username: username, name: name, oldPfp: oldPfp, newPfp: newPfp, newPfpName: newPfpName}, 
+        this.http.put<{newPfpUrl:string}>(environment.apiBaseUrl + '/update-profile', {username: username, name: name, oldPfp: oldPfp, newPfp: newPfp, newPfpName: newPfpName}, 
           {responseType:"json", withCredentials: true}).subscribe(response => {
             if(response.newPfpUrl !== ''){
               this.personalUserInfoService.updateUserPfp(response.newPfpUrl)
@@ -27,7 +28,7 @@ export class ProfileService {
       }
 
       else{
-        this.http.put<{inserted:string}>('http://localhost:8080/update-profile', {username: username, name: name}, {responseType:"json", withCredentials: true}).subscribe(response => {
+        this.http.put<{inserted:string}>(environment.apiBaseUrl + '/update-profile', {username: username, name: name}, {responseType:"json", withCredentials: true}).subscribe(response => {
           infoUpdated.next(response.inserted ===  "true")
         })
       }

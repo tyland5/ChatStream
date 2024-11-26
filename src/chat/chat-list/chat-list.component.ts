@@ -1,5 +1,4 @@
 import { Component, OnInit, Input, Output, EventEmitter, OnDestroy} from '@angular/core';
-import { ChatPage } from '../chat-page/chat-page.component';
 import { ChatListElement } from '../chat-list-element/chat-list-element.component';
 import { FinalChatListResponse, ChatListResponse, User, ActiveChat } from '../../interfaces/interfaces';
 import { CommonModule } from '@angular/common';
@@ -12,7 +11,7 @@ import { Subscription } from 'rxjs';
 @Component({
   selector: 'chat-list',
   standalone: true,
-  imports: [ChatPage, ChatListElement, CommonModule, MatIconModule, FormsModule, CreateChat],
+  imports: [ChatListElement, CommonModule, MatIconModule, FormsModule, CreateChat],
   templateUrl: './chat-list.component.html'
 })
 export class ChatList implements OnInit, OnDestroy{
