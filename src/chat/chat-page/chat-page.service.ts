@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Subject, Observable} from 'rxjs';
 import { ChatListResponse, MessageResponse } from '../../interfaces/interfaces';
 import { RxStompService, RxStompServiceBase } from '../../global-services/rxstomp.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -33,9 +34,10 @@ export class ChatPageService {
         const reader = new FileReader();
         reader.onload = () => {
           const base64 = reader.result as string;
-          this.http.post<Object>("http://localhost:8080/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: base64, mediaName: mediaName}, {responseType:"json", withCredentials: true})
+          this.http.post<{message: Object}>(environment.apiBaseUrl + "/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: base64, mediaName: mediaName}, {responseType:"json", withCredentials: true})
           .subscribe(response => {
-            this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body:JSON.stringify({...response})});
+            const messageObj = response.message
+            this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body:JSON.stringify({...messageObj})});
           })
         };
         reader.readAsDataURL(media);
@@ -43,9 +45,10 @@ export class ChatPageService {
         return
       }
 
-      this.http.post<Object>("http://localhost:8080/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: "", mediaName: ""}, {responseType:"json", withCredentials: true})
+      this.http.post<{message:Object}>(environment.apiBaseUrl + "/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: "", mediaName: ""}, {responseType:"json", withCredentials: true})
       .subscribe(response => {
-        this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body:JSON.stringify({...response})});
+        const messageObj = response.message
+        this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body:JSON.stringify({...messageObj})});
       })
     }
 
@@ -57,7 +60,8 @@ export class ChatPageService {
     getMessages(chatId: string){
       const chatMessages = new Subject<MessageResponse[]>();
 
-      this.http.get<MessageResponse[]>('http://localhost:8080/get-messages', {responseType:"json", withCredentials: true, params:{chatId:chatId}}).subscribe(messages =>{
+      this.http.get<{messages: MessageResponse[]}>(environment.apiBaseUrl + '/get-messages', {responseType:"json", withCredentials: true, params:{chatId:chatId}}).subscribe(response =>{
+        const messages = response.messages
         chatMessages.next(messages)
       })
 

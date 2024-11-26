@@ -67,8 +67,10 @@ import { environment } from "../environments/environment";
     logoutUser(){
       let signedOut = new Subject<boolean>();
 
-      this.http.delete<boolean>(environment.apiBaseUrl + '/logout', {withCredentials: true, responseType: "json"}).subscribe(succesfullyLoggedOut =>{
-          if(succesfullyLoggedOut){
+      this.http.delete<{loggedOut: boolean}>(environment.apiBaseUrl + '/logout', {withCredentials: true, responseType: "json"}).subscribe(response =>{
+        const succesfullyLoggedOut = response.loggedOut
+          
+        if(succesfullyLoggedOut){
               this.updateLoggedIn(false)
           }
           signedOut.next(succesfullyLoggedOut)

@@ -80,7 +80,6 @@ export class CreateChat implements OnInit, OnDestroy{
     if(!chatExists){
       this.chatTabService.updateActiveChat({chatId: "", chatName: ""})
       this.chatListService.createNewChat(Array.from(finalSelectedUsers))
-      console.log("chat does not exist")
     }
 
     this.closeCreateChat.emit();
