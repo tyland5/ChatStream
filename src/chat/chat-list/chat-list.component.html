@@ -14,7 +14,7 @@
     </div>
 
     <div *ngIf="creatingNewChat">
-        <create-chat (closeCreateChat)="creatingNewChat = false"></create-chat>
+        <create-chat [userInfoDict]="userInfoDict" (closeCreateChat)="creatingNewChat = false"></create-chat>
     </div>
         
 </div> 

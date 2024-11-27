@@ -45,14 +45,14 @@ export class ChatListService {
         return this.rxStomp.watch("/chatlist/" + userId);
     }
 
-    createNewChat(chatMembers: string[]){
+    createNewChat(chatMembers: string[], chatMemberObjects: User[]){
 
         // first create a new row in the table
         // then publish with all info about the members in case it has gc with other people a user is not friends with.
         // the one person with none as friends will be able to add them to their user dict when they handle the websocket subscription
         this.http.post<{chat: ChatListResponse}>(environment.apiBaseUrl + "/create-chat", {chatMembers: chatMembers}, {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
         .subscribe(response => {
-            const newChat = response.chat //{...response.chat, chatMemberObjects}
+            const newChat = {...response.chat, memberObjects: chatMemberObjects}
             chatMembers.forEach(member => {
             this.rxStomp.publish({destination: '/chatlist/updateChatlist/' + member,  body: JSON.stringify(newChat)})
             })

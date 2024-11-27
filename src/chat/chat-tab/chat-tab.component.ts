@@ -5,7 +5,6 @@ import { FinalChatListResponse, ChatListResponse, User, ActiveChat, MessageRespo
 import { FriendsService } from '../../user/friends/friends.service';
 import { ChatList } from '../chat-list/chat-list.component';
 import { Observable, Subscription } from 'rxjs';
-import { IMessage } from '@stomp/rx-stomp';
 import { ChatPageService } from '../chat-page/chat-page.service';
 import { ChatTabService } from './chat-tab.service';
 
@@ -41,7 +40,13 @@ export class ChatTab implements OnInit, OnDestroy{
 
     // this is for any new chats that are created from publish in backend
     this.chatListRxStomp = this.chatlistService.getChatlistSubscription(localStorage.getItem("uid") as string).subscribe(response => {
-      const newChat: ChatListResponse = JSON.parse(response.body)
+      const responseBody: ChatListResponse & {memberObjects: User[]} = JSON.parse(response.body)
+      const newChat: ChatListResponse = {...responseBody}
+      const usersToAdd: User[] = responseBody.memberObjects
+
+      // in case friend adds you to a gc w/ non mutual friends. need to add users to userinfodict for proper rendering
+      usersToAdd.forEach(user=>this.userInfoDict[user.id] = user)
+
       this.chatTabService.updateChatList([newChat, ...this.chatList])
       this.createChatSubscription(newChat)
     })
@@ -65,6 +70,7 @@ export class ChatTab implements OnInit, OnDestroy{
 
     this.friendsService.getFriends().subscribe(friendList => {
       this.chatTabService.updateFriendList(friendList)
+      friendList.forEach(friend => this.userInfoDict[friend.id] = friend) // update userinfo dict to have friends as well
     })
   }
 

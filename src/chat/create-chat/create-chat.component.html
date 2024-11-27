@@ -10,7 +10,7 @@
 
         <div class="flex flex-wrap gap-[10px]">
             <div *ngFor="let uid of selectedUsers" class="bg-gray-500 p-[10px] hover:cursor-pointer" (click)="modifySelectedUsers(uid)">
-                <p class="font-bold dark:text-white">{{friendMap[uid]}}   X</p>
+                <p class="font-bold dark:text-white">{{userInfoDict[uid].username}}   X</p>
             </div>
         </div>
     </div>
