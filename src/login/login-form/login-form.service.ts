@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Subject, pipe, catchError, throwError} from 'rxjs';
 import { LoginJsonResponse } from '../../interfaces/interfaces';
 import { PersonalUserInfoService } from '../../global-services/personalUserinfo.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -14,7 +15,7 @@ export class LoginFormService {
         let isValid = new Subject<boolean>();
         
         // MAKE SURE WITH CREDENTIALS IS THERE OR CROSS SITE COOKIES WONT BE ALLOWED
-        this.http.get<LoginJsonResponse>('http://localhost:8080/check-credentials', {params: {username: uname, password: pw}, responseType: "json", withCredentials: true})
+        this.http.post<LoginJsonResponse>(environment.apiBaseUrl + '/check-credentials', {username: uname, password: pw}, {responseType: "json", withCredentials: true})
         .pipe(catchError(error => {
             if(error.status == 401){
                 isValid.next(false)

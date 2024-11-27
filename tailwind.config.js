@@ -19,7 +19,11 @@ module.exports = {
     "./src/user/friends/friends.component.{html,ts}"
   ],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+
+      },
+    },
   },
   plugins: [],
 }

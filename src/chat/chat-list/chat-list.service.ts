@@ -3,12 +3,14 @@ import { HttpClient } from '@angular/common/http';
 import { Subject, pipe, catchError, throwError, switchMap} from 'rxjs';
 import { ChatListResponse, FinalChatListResponse, User } from '../../interfaces/interfaces';
 import { RxStompService, RxStompServiceBase } from '../../global-services/rxstomp.service';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ChatListService {
     rxStomp: RxStompServiceBase;
+    csrf: string = localStorage.getItem("csrf") as string;
 
     constructor(private http:HttpClient, private rxStompService: RxStompService){
         this.rxStomp = this.rxStompService.getConnection();
@@ -19,20 +21,21 @@ export class ChatListService {
         let chatList: ChatListResponse[] | FinalChatListResponse= [] 
         
         // MAKE SURE WITH CREDENTIALS IS THERE OR CROSS SITE COOKIES WONT BE ALLOWED
-        this.http.get<ChatListResponse[] | FinalChatListResponse>('http://localhost:8080/get-chatlist', {responseType: "json", withCredentials: true})
+        this.http.get<ChatListResponse[] | FinalChatListResponse>(environment.apiBaseUrl + '/get-chatlist', {responseType: "json", withCredentials: true})
         .pipe(switchMap((response) => {
-            chatList = response as ChatListResponse[]
+            chatList = (response as unknown as {list: ChatListResponse[]}).list as ChatListResponse[]
 
             let userIds: string[] = []
             chatList.forEach((chat) =>{
                 userIds = userIds.concat(chat.members)
             })
             
-            return this.http.get('http://localhost:8080/get-user-info',{params: {uids: userIds}, responseType: "json", withCredentials: true});
+            return this.http.get(environment.apiBaseUrl + '/get-user-info',{params: {uids: userIds}, responseType: "json", withCredentials: true});
         }))
         
         .subscribe((response2)=>{
-            retrievedChatList.next({chatlist: chatList as ChatListResponse[], users: response2 as User[]})
+            const users = (response2 as {uinfo:User[]}).uinfo
+            retrievedChatList.next({chatlist: chatList as ChatListResponse[], users:users})
         })
         
         return retrievedChatList.asObservable();
@@ -45,12 +48,15 @@ export class ChatListService {
     createNewChat(chatMembers: string[]){
 
         // first create a new row in the table
-        this.http.post<ChatListResponse>("http://localhost:8080/create-chat", {chatMembers: chatMembers}, {responseType:"json", withCredentials: true})
-        .subscribe(newChat => {
-          chatMembers.forEach(member => {
+        // then publish with all info about the members in case it has gc with other people a user is not friends with.
+        // the one person with none as friends will be able to add them to their user dict when they handle the websocket subscription
+        this.http.post<{chat: ChatListResponse}>(environment.apiBaseUrl + "/create-chat", {chatMembers: chatMembers}, {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
+        .subscribe(response => {
+            const newChat = response.chat //{...response.chat, chatMemberObjects}
+            chatMembers.forEach(member => {
             this.rxStomp.publish({destination: '/chatlist/updateChatlist/' + member,  body: JSON.stringify(newChat)})
-          })
+            })
         })
-        //this.rxStomp.publish({destination: '/chatlist/' + })
+       
     }
 }

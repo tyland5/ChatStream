@@ -1,5 +1,5 @@
 
-<div (click)="changeActiveChat()" [ngStyle]="this.isActive ? {'background-color': '#4b5563'} : {'background-color': '#000000'}" 
+<div (click)="changeActiveChat()" [ngClass]="{'bg-gray-600': this.isActive === true}"
 class="flex gap-[10px] items-center flex-nowrap text-ellipsis hover:bg-gray-600 mb-[16px] cursor-pointer">
     <img class="h-[40px] w-[40px] bg-white rounded-full" [src]="chatPic"/>
 
