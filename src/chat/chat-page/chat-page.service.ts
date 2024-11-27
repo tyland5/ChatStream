@@ -10,6 +10,7 @@ import { environment } from '../../environments/environment';
 })
 export class ChatPageService {
     rxStomp: RxStompServiceBase;
+    csrf: string = localStorage.getItem("csrf") as string;
 
     constructor(private http:HttpClient, private rxStompService: RxStompService){
       // setup the stomp service
@@ -34,7 +35,8 @@ export class ChatPageService {
         const reader = new FileReader();
         reader.onload = () => {
           const base64 = reader.result as string;
-          this.http.post<{message: Object}>(environment.apiBaseUrl + "/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: base64, mediaName: mediaName}, {responseType:"json", withCredentials: true})
+          this.http.post<{message: Object}>(environment.apiBaseUrl + "/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: base64, mediaName: mediaName}, 
+            {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
           .subscribe(response => {
             const messageObj = response.message
             this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body:JSON.stringify({...messageObj})});
@@ -45,7 +47,8 @@ export class ChatPageService {
         return
       }
 
-      this.http.post<{message:Object}>(environment.apiBaseUrl + "/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: "", mediaName: ""}, {responseType:"json", withCredentials: true})
+      this.http.post<{message:Object}>(environment.apiBaseUrl + "/create-new-message", {message: message, chatId: chatId, sender:sender, sentAt:sentAt, type: "create", media: "", mediaName: ""}, 
+        {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
       .subscribe(response => {
         const messageObj = response.message
         this.rxStomp.publish({ destination: '/chat/updateChat/' + chatId, body:JSON.stringify({...messageObj})});

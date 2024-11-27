@@ -15,7 +15,7 @@ import { ChatListService } from '../chat-list/chat-list.service';
   templateUrl: './create-chat.component.html'
 })
 export class CreateChat implements OnInit, OnDestroy{
-  filteredFriendList: User[] = [];
+  filteredFriendList: User[] = []; // when searching for friend with search bar
   selectedUsers: Set<string> = new Set();
   chatList: ChatListResponse[] = [];
   chatListSubscription: Subscription;
@@ -54,6 +54,7 @@ export class CreateChat implements OnInit, OnDestroy{
   createChat(): void{
     let chatExists = false
     const finalSelectedUsers = new Set([...this.selectedUsers, localStorage.getItem("uid") as string])
+    const finalSelectedUsersInfo: User[] = []
 
     for(let i =0; i< this.chatList.length; i++){
       const chat = this.chatList[i]
@@ -71,7 +72,6 @@ export class CreateChat implements OnInit, OnDestroy{
 
       if(correctChat){
         chatExists = true
-        console.log("CHAT EXISTS")
         this.chatTabService.updateActiveChat({chatId: chat.id, chatName: this.getChatName(chat)})
         break
       }

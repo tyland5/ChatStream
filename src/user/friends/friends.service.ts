@@ -8,6 +8,7 @@ import { environment } from '../../environments/environment';
   providedIn: 'root',
 })
 export class FriendsService {
+    csrf: string = localStorage.getItem("csrf") as string;
 
     constructor(private http:HttpClient){}
 
@@ -60,7 +61,8 @@ export class FriendsService {
     sendFriendRequest(otherUid: string){
       const sent = new Subject<boolean>();
 
-      this.http.post<{inserted:boolean}>(environment.apiBaseUrl + "/send-friend-request", {uid:otherUid}, {responseType:"json", withCredentials: true})
+      this.http.post<{inserted:boolean}>(environment.apiBaseUrl + "/send-friend-request", {uid:otherUid}, 
+        {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
       .subscribe(response => {
         sent.next(response.inserted)
       })
@@ -71,7 +73,8 @@ export class FriendsService {
     acceptFriendRequest(otherUid:string){
       const accepted = new Subject<boolean>();
       
-      this.http.put<{accepted:boolean}>(environment.apiBaseUrl + "/accept-friend-request", {uid:otherUid}, {responseType:"json", withCredentials: true})
+      this.http.put<{accepted:boolean}>(environment.apiBaseUrl + "/accept-friend-request", {uid:otherUid}, 
+        {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
       .subscribe(response => {
         accepted.next(response.accepted)
       })
@@ -83,7 +86,8 @@ export class FriendsService {
     removeOutgoingFriendRequest(otherUid: string){
       const removed = new Subject<boolean>();
 
-      this.http.post<{removed:boolean}>(environment.apiBaseUrl + "/remove-outgoing-friend-request", {uid:otherUid}, {responseType:"json", withCredentials: true})
+      this.http.post<{removed:boolean}>(environment.apiBaseUrl + "/remove-outgoing-friend-request", {uid:otherUid}, 
+        {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
       .subscribe(response => {
         removed.next(response.removed)
       })
@@ -94,7 +98,8 @@ export class FriendsService {
     removeIncomingFriendRequest(otherUid: string){
       const removed = new Subject<boolean>();
 
-      this.http.post<{removed:boolean}>(environment.apiBaseUrl + "/remove-incoming-friend-request", {uid:otherUid}, {responseType:"json", withCredentials: true})
+      this.http.post<{removed:boolean}>(environment.apiBaseUrl + "/remove-incoming-friend-request", {uid:otherUid}, 
+        {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
       .subscribe(response => {
         removed.next(response.removed)
       })

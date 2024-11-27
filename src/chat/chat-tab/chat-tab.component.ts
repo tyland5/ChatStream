@@ -1,6 +1,5 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ChatPage } from '../chat-page/chat-page.component';
-import { ChatListElement } from '../chat-list-element/chat-list-element.component';
 import { ChatListService } from '../chat-list/chat-list.service';
 import { FinalChatListResponse, ChatListResponse, User, ActiveChat, MessageResponse } from '../../interfaces/interfaces';
 import { FriendsService } from '../../user/friends/friends.service';
@@ -13,7 +12,7 @@ import { ChatTabService } from './chat-tab.service';
 @Component({
   selector: 'forgot-password',
   standalone: true,
-  imports: [ChatPage, ChatListElement, ChatList],
+  imports: [ChatPage, ChatList],
   templateUrl: './chat-tab.component.html'
 })
 export class ChatTab implements OnInit, OnDestroy{
@@ -40,6 +39,7 @@ export class ChatTab implements OnInit, OnDestroy{
       this.chatList = newChatList
     })
 
+    // this is for any new chats that are created from publish in backend
     this.chatListRxStomp = this.chatlistService.getChatlistSubscription(localStorage.getItem("uid") as string).subscribe(response => {
       const newChat: ChatListResponse = JSON.parse(response.body)
       this.chatTabService.updateChatList([newChat, ...this.chatList])
