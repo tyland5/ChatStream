@@ -15,7 +15,7 @@ export class LoginFormService {
         let isValid = new Subject<boolean>();
         
         // MAKE SURE WITH CREDENTIALS IS THERE OR CROSS SITE COOKIES WONT BE ALLOWED
-        this.http.get<LoginJsonResponse>(environment.apiBaseUrl + '/check-credentials', {params: {username: uname, password: pw}, responseType: "json", withCredentials: true})
+        this.http.post<LoginJsonResponse>(environment.apiBaseUrl + '/check-credentials', {username: uname, password: pw}, {responseType: "json", withCredentials: true})
         .pipe(catchError(error => {
             if(error.status == 401){
                 isValid.next(false)
