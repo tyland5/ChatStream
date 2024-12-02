@@ -14,6 +14,7 @@ import { CommonModule } from '@angular/common';
   styleUrl:'./chat-message.component.scss'
 })
 export class ChatMessage{
+  onMobile: boolean = window.innerWidth < 768
   @Input() messageInfo: {messageObj: MessageResponse, senderInfo: User};
   @Input() highlightedMessage: boolean;
   @Input() mediaUrl: string;

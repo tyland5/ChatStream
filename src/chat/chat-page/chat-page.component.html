@@ -1,6 +1,7 @@
 <body #chatPageContainer class="flex flex-col h-full overflow-hidden">
     <div *ngIf="chatName !== ''" #chatHeader class="flex border-b-[1px] border-gray-50 w-full px-[10px] py-[12px]">
-        <p class="italic dark:text-white"> {{chatName}} </p>
+        <mat-icon [hidden]="onMobile" class="mr-[16px] dark:text-white hover:cursor-pointer" fontIcon="arrow_back" (click)="backPressed.emit()"></mat-icon>
+        <p class="text-base font-bold dark:text-white"> {{chatName}} </p>
         <mat-icon *ngIf="false" class="mr-[10px] dark:text-white hover:cursor-pointer" fontIcon="info"></mat-icon> <!-- for gc details -->
     </div>
 
@@ -18,7 +19,7 @@
     </div>
     
 
-    <div #textInput class ="sticky bottom-0 w-full border-t-2 border-white py-[12px] px-[15px] z-10"> 
+    <div #textInput class ="sticky bottom-0 w-full border-t-2 border-white py-[12px] px-[10px] z-10"> 
         
         <div *ngIf="editingMessageId !== ''" class="w-full mb-[10px] flex gap-[10px] items-center">
             <mat-icon (click)="editingMessageId = ''; message ='' " class="dark:text-white hover:cursor-pointer" fontIcon="cancel"></mat-icon>

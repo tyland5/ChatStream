@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, HostListener } from '@angular/core';
 import { ChatPage } from '../chat-page/chat-page.component';
 import { ChatListService } from '../chat-list/chat-list.service';
 import { FinalChatListResponse, ChatListResponse, User, ActiveChat, MessageResponse } from '../../interfaces/interfaces';
@@ -15,16 +15,18 @@ import { ChatTabService } from './chat-tab.service';
   templateUrl: './chat-tab.component.html'
 })
 export class ChatTab implements OnInit, OnDestroy{
-  
   chatList: ChatListResponse[] = []
   userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
-  activeChatId: string = ""
-  activeChatName: string = ""
   creatingNewChat: boolean = false
- 
+  activeChat: ActiveChat = {} as ActiveChat
   chatSubscriptions : Subscription[] = []
   chatListSubscription: Subscription;
   chatListRxStomp: Subscription;
+  activeChatSubscription: Subscription;
+
+  // for mobile rendering 
+  onMobile: boolean = window.innerWidth < 768
+  showChatPage: boolean = false // initally render the chat list in the mobile view
 
   constructor(private chatlistService: ChatListService, private chatPageService: ChatPageService, private friendsService: FriendsService, private chatTabService: ChatTabService){
   }
@@ -32,11 +34,20 @@ export class ChatTab implements OnInit, OnDestroy{
   // keeping these calls here because if I switched to mobile view and conditionally rendered chatlist, then these would always execute on init when it shouldn't
   ngOnInit(): void {
 
+    // subscribe to active chat so you can show chat page in mobile view
+    this.activeChatSubscription = this.chatTabService.activeChat.subscribe(currentChat =>{
+      if(currentChat.chatId !== ""){
+        this.showChatPage = true
+      } 
+    })
+
+
     // need this for createChatSubscription (to update chat list properly when using chat publish subscribe websocket)
     // initializes chat list var here with the observable
     this.chatListSubscription = this.chatTabService.chatList.subscribe(newChatList => {
       this.chatList = newChatList
     })
+
 
     // this is for any new chats that are created from publish in backend
     this.chatListRxStomp = this.chatlistService.getChatlistSubscription(localStorage.getItem("uid") as string).subscribe(response => {
@@ -50,6 +61,7 @@ export class ChatTab implements OnInit, OnDestroy{
       this.chatTabService.updateChatList([newChat, ...this.chatList])
       this.createChatSubscription(newChat)
     })
+
 
     // initalizes the observable chatlist that can be viewed in all components of chat tab
     this.chatlistService.getChatlist().subscribe((finalChatListResponse: FinalChatListResponse)=>{
@@ -68,10 +80,13 @@ export class ChatTab implements OnInit, OnDestroy{
       }
     })
 
+
+    // get friends
     this.friendsService.getFriends().subscribe(friendList => {
       this.chatTabService.updateFriendList(friendList)
       friendList.forEach(friend => this.userInfoDict[friend.id] = friend) // update userinfo dict to have friends as well
     })
+
   }
 
   ngOnDestroy(): void {
@@ -81,6 +96,7 @@ export class ChatTab implements OnInit, OnDestroy{
 
     this.chatListSubscription.unsubscribe()
     this.chatListRxStomp.unsubscribe()
+    this.activeChatSubscription.unsubscribe()
   }
 
   createChatSubscription(chat: ChatListResponse) : void{

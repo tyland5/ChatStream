@@ -1,4 +1,4 @@
-import {afterNextRender, Component, inject, Injector, ViewChild, ElementRef, Input, Output, HostListener, AfterViewInit, OnInit, OnChanges, SimpleChanges, OnDestroy} from '@angular/core';
+import {Component, inject, Injector, ViewChild, ElementRef, Input, Output, OnInit, OnDestroy, EventEmitter} from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import {CdkTextareaAutosize, TextFieldModule} from '@angular/cdk/text-field';
@@ -22,6 +22,7 @@ import {MatIconModule} from '@angular/material/icon';
 })
 export class ChatPage implements OnDestroy, OnInit{
   private _injector = inject(Injector);
+  onMobile: boolean = window.innerWidth < 768
   message: string = "";
   chatHistory: MessageResponse[];
   stompSubscription: Subscription;
@@ -34,6 +35,7 @@ export class ChatPage implements OnDestroy, OnInit{
   chatName: string;
 
   @Input() userInfoDict:  { [id: string]: User };
+  @Output() backPressed = new EventEmitter<void>();
   @ViewChild('autosize') autosize: CdkTextareaAutosize;
   @ViewChild('chatMessages') chatMessages: ElementRef;
 
@@ -41,7 +43,7 @@ export class ChatPage implements OnDestroy, OnInit{
 
   ngOnInit(): void {
 
-    // get messages for new chat
+    // get messages for chat that has just been selected
     this.activeChatSubscription = this.chatTabService.activeChat.subscribe(newActiveChat => {
       this.chatId = newActiveChat.chatId
       this.chatName = newActiveChat.chatName
