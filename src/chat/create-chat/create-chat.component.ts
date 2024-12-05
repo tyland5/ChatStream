@@ -68,7 +68,7 @@ export class CreateChat implements OnInit, OnDestroy{
 
       if(correctChat){
         chatExists = true
-        this.chatTabService.updateActiveChat({chatId: chat.id, chatName: this.getChatName(chat)})
+        this.chatTabService.updateActiveChat({chatId: chat.id, chatName: this.getChatName(chat), members: this.chatList[i].members})
         break
       }
     }
@@ -77,7 +77,7 @@ export class CreateChat implements OnInit, OnDestroy{
       const finalSelectedUsersArray: string[] = Array.from(finalSelectedUsers) //ids
       const finalSelectedUsersInfo: User[] = finalSelectedUsersArray.map(userId=> {return this.userInfoDict[userId]})
 
-      this.chatTabService.updateActiveChat({chatId: "", chatName: ""})
+      this.chatTabService.updateActiveChat({chatId: "", chatName: "", members: [] as string[]})
       this.chatListService.createNewChat(finalSelectedUsersArray, finalSelectedUsersInfo)
     }
 

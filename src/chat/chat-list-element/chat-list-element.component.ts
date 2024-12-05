@@ -14,6 +14,7 @@ export class ChatListElement implements OnInit {
   @Input() latestMessage: {name:string, message:string};
   @Input() chatPic: string = "";
   @Input() chatId: string = "";
+  @Input() members: string[] = [];
   @Input() isActive: Boolean = false;
   
   constructor(private chatTabService: ChatTabService){}
@@ -22,6 +23,6 @@ export class ChatListElement implements OnInit {
   }
 
   changeActiveChat(){
-    this.chatTabService.updateActiveChat({chatId: this.chatId, chatName: this.chatName})
+    this.chatTabService.updateActiveChat({chatId: this.chatId, chatName: this.chatName, members: this.members})
   }
 } 

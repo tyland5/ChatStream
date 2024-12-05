@@ -17,7 +17,7 @@ import { Subscription } from 'rxjs';
 export class ChatList implements OnInit, OnDestroy{
   
   @Input() userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
-  activeChat: ActiveChat = {chatId: "", chatName: ""}
+  activeChatId: string = ""
   creatingNewChat: boolean = false
   chatList: ChatListResponse[] = []
   chatListSubscription: Subscription;
@@ -31,7 +31,7 @@ export class ChatList implements OnInit, OnDestroy{
     })
 
     this.activeChatSubscription = this.chatTabService.activeChat.subscribe(newActiveChat => {
-      this.activeChat = newActiveChat
+      this.activeChatId = newActiveChat.chatId
     })
   }
 

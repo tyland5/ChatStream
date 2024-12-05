@@ -38,6 +38,7 @@ export class ChatTab implements OnInit, OnDestroy{
     this.activeChatSubscription = this.chatTabService.activeChat.subscribe(currentChat =>{
       if(currentChat.chatId !== ""){
         this.showChatPage = true
+        this.activeChat = currentChat
       } 
     })
 
@@ -50,10 +51,29 @@ export class ChatTab implements OnInit, OnDestroy{
 
 
     // this is for any new chats that are created from publish in backend
+    // this also considers if a gc has been updated (name, picture)
     this.chatListRxStomp = this.chatlistService.getChatlistSubscription(localStorage.getItem("uid") as string).subscribe(response => {
       const responseBody: ChatListResponse & {memberObjects: User[]} = JSON.parse(response.body)
       const newChat: ChatListResponse = {...responseBody}
       const usersToAdd: User[] = responseBody.memberObjects
+
+      // if a group chat has been updated, memberObjects will be empty 
+      if(usersToAdd.length == 0){
+        const chatIndex = this.chatList.findIndex((chat) => chat.id === newChat.id)
+        const updatedChat = this.chatList[chatIndex]
+        updatedChat.chatName = newChat.chatName
+       
+        const newChatList = [updatedChat, ...this.chatList.filter((chat) => chat.id != newChat.id)]
+        this.chatTabService.updateChatList(newChatList)
+        
+        // this is primarily for other user. if the chat is pulled up when another changes chat name, we need to force update it
+        // through the active chat since chat page uses that name property
+        if(this.activeChat.chatId == newChat.id){
+          this.chatTabService.updateActiveChat({...this.activeChat, chatName: newChat.chatName as string})
+        }
+        
+        return 
+      }
 
       // in case friend adds you to a gc w/ non mutual friends. need to add users to userinfodict for proper rendering
       usersToAdd.forEach(user=>this.userInfoDict[user.id] = user)
