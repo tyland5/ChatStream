@@ -1,15 +1,17 @@
 <div>
     <div [ngClass]="{'bg-gray-600': highlightedMessage === true}" class="flex gap-[10px] mb-[20px] hover:bg-gray-600">
-        <div>
+        <div class="min-h-[40px] min-w-[40px]">
             <img class="h-[40px] w-[40px] bg-white rounded-full" [src]="messageInfo.senderInfo.pfp"/>
         </div>
             
-        <div>
-            <div class="flex items-end gap-[10px]">
-                <p class="text-base font-bold dark:text-white">{{messageInfo.senderInfo.name}}</p>
-                <p class="text-sm text-gray-500">{{getDate()}} {{getTime()}}</p>
+        <div class="flex-1">
+            <div class="flex items-center gap-[10px] flex-wrap">
+                <p class="text-base font-medium dark:text-white min-w-0 text-ellipsis overflow-hidden whitespace-nowrap">{{messageInfo.senderInfo.name}}</p>
+                <p class="text-xs min-w-fit text-gray-500 ">{{getDate()}} {{getTime()}}</p>
 
-                <button mat-button [matMenuTriggerFor]="menu"><mat-icon class="text-white" aria-hidden="false" aria-label="Example home icon" fontIcon="more_horiz"></mat-icon></button>
+                <button [hidden]="onMobile" class="ml-auto" mat-button [matMenuTriggerFor]="menu">
+                    <mat-icon class="text-white" fontIcon="more_horiz"></mat-icon>
+                </button>
                 <mat-menu #menu="matMenu">
                     <button mat-menu-item>
                         <span>Reply</span>

@@ -1,6 +1,8 @@
 <body #chatPageContainer class="flex flex-col h-full overflow-hidden">
-    <div #chatHeader class="border-b-[1px] border-gray-50 w-full px-[10px] py-[12px]">
-        <p class="italic dark:text-white"> {{chatName}} </p>
+    <div *ngIf="chatName !== ''" #chatHeader class="flex border-b-[1px] border-gray-50 w-full px-[10px] py-[12px] gap-[16px]">
+        <button [hidden]="!onMobile" ><mat-icon class="dark:text-white hover:cursor-pointer" fontIcon="arrow_back" (click)="backPressed.emit()"></mat-icon></button>
+        <p class="text-base font-bold dark:text-white"> {{chatName}} </p>
+        <button [hidden]="members.length <= 2" (click)="openChatInfoModal()"><mat-icon class="dark:text-white hover:cursor-pointer" fontIcon="info"></mat-icon> </button><!-- for gc details -->
     </div>
 
     <!-- h-[calc(100%-{{inputSize}}px)] -->
@@ -33,7 +35,7 @@
             <input type="file" #fileInput (change)="onFileSelected($event)" class="hidden">
             <mat-icon (click)="fileInput.click()" class="mr-[10px] dark:text-white hover:cursor-pointer" fontIcon="add_a_photo"></mat-icon>
 
-            <mat-form-field [style.width] = "'80%'" subscriptSizing="dynamic">
+            <mat-form-field class="flex-1" subscriptSizing="dynamic">
                 <mat-label [style.color]="'white'">{{getInputLabel()}}</mat-label>
                 <textarea   matInput
                     cdkTextareaAutosize
@@ -41,7 +43,7 @@
                     #autosize="cdkTextareaAutosize"
                     cdkAutosizeMinRows="1"
                     cdkAutosizeMaxRows="5"
-                    [style.color]="'white'"  [style.fontSize]= "'1rem'"
+                    [style.color]="'white'"  [style.fontSize]= "'1rem'" (keyup.enter)="sendMessage()"
                 ></textarea>
             </mat-form-field>
 

@@ -1,0 +1,18 @@
+<div class="dark dark:bg-[#1A1A1D] max-w-[500px] max-h-[450px] h-screen w-full relative flex flex-col">
+    <div class="border-b-2 border-b-black dark:border-b-white mb-[16px] py-[16px] px-[16px]">
+        <input type="text" class="w-full text-base border-none hover:bg-gray-600 bg-transparent font-semibold dark:text-white " value="chatName" [(ngModel)] = "chatName">
+    </div>
+    
+    <p class="text-base dark:text-white px-[16px] mb-[16px]">Members</p>
+
+    <div class="flex-1 min-h-0 overflow-auto">
+        <div class="mb-[20px] px-[16px]" *ngFor="let member of data.members">
+            <userlist-element id = "{{member.id}}" name="{{member.name}}" username="{{member.username}}" pfp="{{member.pfp}}"></userlist-element>
+        </div>
+    </div>
+    
+    <div class="w-full h-fit py-[16px] flex justify-end gap-[32px]">
+        <button class="text-base dark:text-white py-1 px-2 rounded-lg bg-gray-500 hover:bg-gray-600" (click)="dialogRef.close()">Cancel</button>
+        <button class="text-base dark:text-white mr-[16px] py-1 px-2 rounded-lg bg-purple-400 hover:bg-purple-500" [mat-dialog-close]="chatName">Save</button>
+    </div>
+</div>

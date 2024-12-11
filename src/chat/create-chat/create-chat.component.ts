@@ -20,9 +20,9 @@ export class CreateChat implements OnInit, OnDestroy{
   chatList: ChatListResponse[] = [];
   chatListSubscription: Subscription;
   friendList: User[] = [];
-  friendMap: {[uid: string]: string} = {}
   friendListSubscription: Subscription;
 
+  @Input() userInfoDict: { [id: string]: User } = {}
   @Output() closeCreateChat = new EventEmitter<void>();
 
   constructor(private chatTabService: ChatTabService, private chatListService: ChatListService){}
@@ -30,9 +30,6 @@ export class CreateChat implements OnInit, OnDestroy{
   ngOnInit(): void {
     this.friendListSubscription = this.chatTabService.friendList.subscribe(newFriendList =>{
       this.friendList = newFriendList
-      newFriendList.forEach(user=>{
-        this.friendMap[user.id] = user.username
-      })
 
       this.filteredFriendList = newFriendList
     })
@@ -54,7 +51,6 @@ export class CreateChat implements OnInit, OnDestroy{
   createChat(): void{
     let chatExists = false
     const finalSelectedUsers = new Set([...this.selectedUsers, localStorage.getItem("uid") as string])
-    const finalSelectedUsersInfo: User[] = []
 
     for(let i =0; i< this.chatList.length; i++){
       const chat = this.chatList[i]
@@ -72,14 +68,17 @@ export class CreateChat implements OnInit, OnDestroy{
 
       if(correctChat){
         chatExists = true
-        this.chatTabService.updateActiveChat({chatId: chat.id, chatName: this.getChatName(chat)})
+        this.chatTabService.updateActiveChat({chatId: chat.id, chatName: this.getChatName(chat), members: this.chatList[i].members})
         break
       }
     }
 
     if(!chatExists){
-      this.chatTabService.updateActiveChat({chatId: "", chatName: ""})
-      this.chatListService.createNewChat(Array.from(finalSelectedUsers))
+      const finalSelectedUsersArray: string[] = Array.from(finalSelectedUsers) //ids
+      const finalSelectedUsersInfo: User[] = finalSelectedUsersArray.map(userId=> {return this.userInfoDict[userId]})
+
+      this.chatTabService.updateActiveChat({chatId: "", chatName: "", members: [] as string[]})
+      this.chatListService.createNewChat(finalSelectedUsersArray, finalSelectedUsersInfo)
     }
 
     this.closeCreateChat.emit();
@@ -102,7 +101,7 @@ export class CreateChat implements OnInit, OnDestroy{
     // find the other user's name
     chat.members.forEach(userId => {
       if(userId != selfUid){
-        chatName = this.friendMap[userId]
+        chatName = this.userInfoDict[userId].username
       }
     });
 

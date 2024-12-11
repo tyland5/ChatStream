@@ -1,11 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, HostListener } from '@angular/core';
 import { ChatPage } from '../chat-page/chat-page.component';
 import { ChatListService } from '../chat-list/chat-list.service';
 import { FinalChatListResponse, ChatListResponse, User, ActiveChat, MessageResponse } from '../../interfaces/interfaces';
 import { FriendsService } from '../../user/friends/friends.service';
 import { ChatList } from '../chat-list/chat-list.component';
 import { Observable, Subscription } from 'rxjs';
-import { IMessage } from '@stomp/rx-stomp';
 import { ChatPageService } from '../chat-page/chat-page.service';
 import { ChatTabService } from './chat-tab.service';
 
@@ -16,16 +15,18 @@ import { ChatTabService } from './chat-tab.service';
   templateUrl: './chat-tab.component.html'
 })
 export class ChatTab implements OnInit, OnDestroy{
-  
   chatList: ChatListResponse[] = []
   userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
-  activeChatId: string = ""
-  activeChatName: string = ""
   creatingNewChat: boolean = false
- 
+  activeChat: ActiveChat = {} as ActiveChat
   chatSubscriptions : Subscription[] = []
   chatListSubscription: Subscription;
   chatListRxStomp: Subscription;
+  activeChatSubscription: Subscription;
+
+  // for mobile rendering 
+  onMobile: boolean = window.innerWidth < 768
+  showChatPage: boolean = false // initally render the chat list in the mobile view
 
   constructor(private chatlistService: ChatListService, private chatPageService: ChatPageService, private friendsService: FriendsService, private chatTabService: ChatTabService){
   }
@@ -33,18 +34,54 @@ export class ChatTab implements OnInit, OnDestroy{
   // keeping these calls here because if I switched to mobile view and conditionally rendered chatlist, then these would always execute on init when it shouldn't
   ngOnInit(): void {
 
+    // subscribe to active chat so you can show chat page in mobile view
+    this.activeChatSubscription = this.chatTabService.activeChat.subscribe(currentChat =>{
+      if(currentChat.chatId !== ""){
+        this.showChatPage = true
+        this.activeChat = currentChat
+      } 
+    })
+
+
     // need this for createChatSubscription (to update chat list properly when using chat publish subscribe websocket)
     // initializes chat list var here with the observable
     this.chatListSubscription = this.chatTabService.chatList.subscribe(newChatList => {
       this.chatList = newChatList
     })
 
+
     // this is for any new chats that are created from publish in backend
+    // this also considers if a gc has been updated (name, picture)
     this.chatListRxStomp = this.chatlistService.getChatlistSubscription(localStorage.getItem("uid") as string).subscribe(response => {
-      const newChat: ChatListResponse = JSON.parse(response.body)
+      const responseBody: ChatListResponse & {memberObjects: User[]} = JSON.parse(response.body)
+      const newChat: ChatListResponse = {...responseBody}
+      const usersToAdd: User[] = responseBody.memberObjects
+
+      // if a group chat has been updated, memberObjects will be empty 
+      if(usersToAdd.length == 0){
+        const chatIndex = this.chatList.findIndex((chat) => chat.id === newChat.id)
+        const updatedChat = this.chatList[chatIndex]
+        updatedChat.chatName = newChat.chatName
+       
+        const newChatList = [updatedChat, ...this.chatList.filter((chat) => chat.id != newChat.id)]
+        this.chatTabService.updateChatList(newChatList)
+        
+        // this is primarily for other user. if the chat is pulled up when another changes chat name, we need to force update it
+        // through the active chat since chat page uses that name property
+        if(this.activeChat.chatId == newChat.id){
+          this.chatTabService.updateActiveChat({...this.activeChat, chatName: newChat.chatName as string})
+        }
+        
+        return 
+      }
+
+      // in case friend adds you to a gc w/ non mutual friends. need to add users to userinfodict for proper rendering
+      usersToAdd.forEach(user=>this.userInfoDict[user.id] = user)
+
       this.chatTabService.updateChatList([newChat, ...this.chatList])
       this.createChatSubscription(newChat)
     })
+
 
     // initalizes the observable chatlist that can be viewed in all components of chat tab
     this.chatlistService.getChatlist().subscribe((finalChatListResponse: FinalChatListResponse)=>{
@@ -63,9 +100,13 @@ export class ChatTab implements OnInit, OnDestroy{
       }
     })
 
+
+    // get friends
     this.friendsService.getFriends().subscribe(friendList => {
       this.chatTabService.updateFriendList(friendList)
+      friendList.forEach(friend => this.userInfoDict[friend.id] = friend) // update userinfo dict to have friends as well
     })
+
   }
 
   ngOnDestroy(): void {
@@ -75,6 +116,7 @@ export class ChatTab implements OnInit, OnDestroy{
 
     this.chatListSubscription.unsubscribe()
     this.chatListRxStomp.unsubscribe()
+    this.activeChatSubscription.unsubscribe()
   }
 
   createChatSubscription(chat: ChatListResponse) : void{

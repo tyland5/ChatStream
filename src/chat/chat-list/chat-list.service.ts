@@ -45,18 +45,35 @@ export class ChatListService {
         return this.rxStomp.watch("/chatlist/" + userId);
     }
 
-    createNewChat(chatMembers: string[]){
+    createNewChat(chatMembers: string[], chatMemberObjects: User[]){
 
         // first create a new row in the table
         // then publish with all info about the members in case it has gc with other people a user is not friends with.
         // the one person with none as friends will be able to add them to their user dict when they handle the websocket subscription
         this.http.post<{chat: ChatListResponse}>(environment.apiBaseUrl + "/create-chat", {chatMembers: chatMembers}, {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
         .subscribe(response => {
-            const newChat = response.chat //{...response.chat, chatMemberObjects}
+            const newChat = {...response.chat, memberObjects: chatMemberObjects}
             chatMembers.forEach(member => {
             this.rxStomp.publish({destination: '/chatlist/updateChatlist/' + member,  body: JSON.stringify(newChat)})
             })
         })
        
+    }
+
+    // this is primarily for group chats right now and name. should incorporate picture
+    // other users get real time update of when another user changes the name or picture of a group chat
+    updateChatInfo(chatName: string, chatId: string, chatMembers:string[]){
+        const chatObj: ChatListResponse = {id:chatId, chatName: chatName, members:chatMembers, latestMessage:{uid:"", messageId:"", message:""}}
+        const memberObj: User[] = []
+        const updatedChat = {...chatObj, memberObjects: memberObj}
+        
+        this.http.put<{updated: boolean}>(environment.apiBaseUrl + "/update-gc-info", {id: chatId, chatName: chatName}, {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
+        .subscribe(response=>{
+            if(response.updated){
+                chatMembers.forEach(member => {
+                    this.rxStomp.publish({destination: '/chatlist/updateChatlist/' + member,  body: JSON.stringify(updatedChat)})
+                })
+            }
+        })
     }
 }

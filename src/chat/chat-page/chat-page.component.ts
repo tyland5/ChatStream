@@ -1,4 +1,4 @@
-import {afterNextRender, Component, inject, Injector, ViewChild, ElementRef, Input, Output, HostListener, AfterViewInit, OnInit, OnChanges, SimpleChanges, OnDestroy} from '@angular/core';
+import {Component, inject, Injector, ViewChild, ElementRef, Input, Output, OnInit, OnDestroy, EventEmitter} from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import {CdkTextareaAutosize, TextFieldModule} from '@angular/cdk/text-field';
@@ -11,6 +11,9 @@ import { User } from '../../interfaces/interfaces';
 import { Subscription } from 'rxjs';
 import { ChatTabService } from '../chat-tab/chat-tab.service';
 import {MatIconModule} from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { ChatInfoModal } from '../chat-info-modal/chat-info-modal.component';
+import { ChatListService } from '../chat-list/chat-list.service';
 
 // A document, including all its embedded documents and arrays, cannot exceed 16MB
 @Component({
@@ -22,29 +25,35 @@ import {MatIconModule} from '@angular/material/icon';
 })
 export class ChatPage implements OnDestroy, OnInit{
   private _injector = inject(Injector);
+  onMobile: boolean = window.innerWidth < 768
   message: string = "";
   chatHistory: MessageResponse[];
   stompSubscription: Subscription;
-  activeChatSubscription: Subscription;
+  activeChatSubscription: Subscription; // need only for private chat
   editingMessageId: string = "";
   uploadedMedia: File | undefined;
   previewImage: string | ArrayBuffer | null = null;
+  readonly dialog = inject(MatDialog); // for chat info modal
 
   chatId: string;
   chatName: string;
+  members: string[];
 
-  @Input() userInfoDict:  { [id: string]: User };
+  // might need input that specifies if private chat or public
+  @Input() userInfoDict:  { [id: string]: User }; // should be initialized in ngoninit for public
+  @Output() backPressed = new EventEmitter<void>();
   @ViewChild('autosize') autosize: CdkTextareaAutosize;
   @ViewChild('chatMessages') chatMessages: ElementRef;
 
-  constructor(private chatpageService: ChatPageService, private chatTabService: ChatTabService){}
+  constructor(private chatpageService: ChatPageService, private chatListService: ChatListService, private chatTabService: ChatTabService){}
 
   ngOnInit(): void {
 
-    // get messages for new chat
+    // get messages for chat that has just been selected
     this.activeChatSubscription = this.chatTabService.activeChat.subscribe(newActiveChat => {
       this.chatId = newActiveChat.chatId
       this.chatName = newActiveChat.chatName
+      this.members = newActiveChat.members
       this.message = "";
       this.editingMessageId = "",
       this.uploadedMedia = undefined;
@@ -151,4 +160,27 @@ export class ChatPage implements OnDestroy, OnInit{
     };
     reader.readAsDataURL(event.target.files[0]);
   }
+
+  openChatInfoModal(): void {
+    const memberList: User[] = []
+    this.members.forEach(uid => memberList.push(this.userInfoDict[uid]))
+
+    const dialogRef = this.dialog.open(ChatInfoModal, {
+      width:"500px", // need this because making screen width smaller clips out buttons and input without it
+      data: {
+        members: memberList,
+        chatName: this.chatName
+      },
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      // result is just a string (chatname) right now
+      if (result !== undefined) {
+        this.chatName = result
+        this.chatListService.updateChatInfo(result, this.chatId, this.members)
+      }
+    });
+
+  }
+
 }
