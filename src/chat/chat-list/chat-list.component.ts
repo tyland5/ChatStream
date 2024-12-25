@@ -7,6 +7,7 @@ import {MatIconModule} from '@angular/material/icon';
 import { CreateChat } from "../create-chat/create-chat.component";
 import { ChatTabService } from '../chat-tab/chat-tab.service';
 import { Subscription } from 'rxjs';
+import { PersonalUserInfoService } from '../../global-services/personalUserinfo.service';
 
 @Component({
   selector: 'chat-list',
@@ -23,7 +24,10 @@ export class ChatList implements OnInit, OnDestroy{
   chatListSubscription: Subscription;
   activeChatSubscription: Subscription;
 
-  constructor(private chatTabService: ChatTabService){}
+  personalUserInfo: User = {} as User
+  personalUserInfoSubscription: Subscription
+
+  constructor(private chatTabService: ChatTabService, private personalUserInfoService: PersonalUserInfoService){}
 
   ngOnInit(): void {
     this.chatListSubscription = this.chatTabService.chatList.subscribe(newChatList => {
@@ -33,11 +37,14 @@ export class ChatList implements OnInit, OnDestroy{
     this.activeChatSubscription = this.chatTabService.activeChat.subscribe(newActiveChat => {
       this.activeChatId = newActiveChat.chatId
     })
+
+    this.personalUserInfoSubscription = this.personalUserInfoService.userInfo.subscribe(info=> this.personalUserInfo = info)
   }
 
   ngOnDestroy(): void {
     this.chatListSubscription.unsubscribe()
     this.activeChatSubscription.unsubscribe()
+    this.personalUserInfoSubscription.unsubscribe()
   }
 
   // helper function for ngFor of chatlist element
@@ -46,7 +53,7 @@ export class ChatList implements OnInit, OnDestroy{
       return chat.chatName as string
     }
 
-    const selfUid = localStorage.getItem("uid")
+    const selfUid = this.personalUserInfo.id
     let chatName: string = ""
 
     // find the other user's name
@@ -64,7 +71,7 @@ export class ChatList implements OnInit, OnDestroy{
       return chat.chatPic as string
     }
 
-    const selfUid = localStorage.getItem("uid") as string
+    const selfUid = this.personalUserInfo.id
     let chatPic: string = ""
 
     // find the other user's pfp

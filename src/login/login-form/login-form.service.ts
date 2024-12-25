@@ -24,9 +24,8 @@ export class LoginFormService {
         }))
         .subscribe((response: LoginJsonResponse) => {
             localStorage.setItem("csrf", response.csrf)
-            localStorage.setItem("uid", response.uid)
-            localStorage.setItem("uinfo", JSON.stringify({name: response.name, username: response.username, pfp: response.pfp}))
-            this.personalUserInfoService.updateUserPfp(response.pfp)
+            this.personalUserInfoService.setCsrf(response.csrf)
+            this.personalUserInfoService.updateUserInfo({id: response.uid, name: response.name, username: response.username, pfp: response.pfp})
             isValid.next(true) // you publish changes to the subscriber
         });
 

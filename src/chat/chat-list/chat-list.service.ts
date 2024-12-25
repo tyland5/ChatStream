@@ -1,19 +1,26 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy, OnInit } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Subject, pipe, catchError, throwError, switchMap} from 'rxjs';
+import { Subject, pipe, catchError, throwError, switchMap, Subscription} from 'rxjs';
 import { ChatListResponse, FinalChatListResponse, User } from '../../interfaces/interfaces';
 import { RxStompService, RxStompServiceBase } from '../../global-services/rxstomp.service';
 import { environment } from '../../environments/environment';
+import { PersonalUserInfoService } from '../../global-services/personalUserinfo.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class ChatListService {
+export class ChatListService implements OnDestroy {
     rxStomp: RxStompServiceBase;
-    csrf: string = localStorage.getItem("csrf") as string;
+    csrf: string
+    csrfSubscription: Subscription
 
-    constructor(private http:HttpClient, private rxStompService: RxStompService){
+    constructor(private http:HttpClient, private rxStompService: RxStompService, private personalUserInfoService: PersonalUserInfoService){
         this.rxStomp = this.rxStompService.getConnection();
+        this.csrfSubscription = this.personalUserInfoService.csrf.subscribe(csrf => {this.csrf = csrf})
+    }
+
+    ngOnDestroy(): void {
+        this.csrfSubscription.unsubscribe()
     }
     
     getChatlist(){

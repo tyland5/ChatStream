@@ -10,7 +10,7 @@ import { LoginFormService } from '../login/login-form/login-form.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, LoginForm, RouterLink, MatIconModule, MatMenuModule, CommonModule],
+  imports: [RouterOutlet, RouterLink, MatIconModule, MatMenuModule, CommonModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
@@ -20,8 +20,8 @@ export class AppComponent {
   pfp: string;
 
   constructor(private router: Router, private personalUserInfoService: PersonalUserInfoService){    
-    this.personalUserInfoService.userPfp.subscribe(newPfp => {
-      this.pfp = newPfp
+    this.personalUserInfoService.userInfo.subscribe(newInfo => {
+      this.pfp = newInfo.pfp
     })
     this.personalUserInfoService.loggedIn.subscribe(newState=>{
       this.loggedIn = newState
