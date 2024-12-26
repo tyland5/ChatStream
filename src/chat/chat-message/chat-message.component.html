@@ -1,5 +1,5 @@
 <div>
-    <div [ngClass]="{'bg-gray-600': highlightedMessage === true}" class="flex gap-[10px] mb-[20px] hover:bg-gray-600">
+    <div (contextmenu)="onRightClick($event)" [ngClass]="{'bg-gray-600': highlightedMessage === true}" class="flex gap-[10px] mb-[20px] hover:bg-gray-600">
         <div class="min-h-[40px] min-w-[40px]">
             <img class="h-[40px] w-[40px] bg-white rounded-full" [src]="messageInfo.senderInfo.pfp"/>
         </div>
@@ -34,4 +34,26 @@
             <img *ngIf="mediaUrl !== ''" [src]="mediaUrl" class="mt-[10px] max-h-[300px]"/> <!-- [ngClass]="{'max-h-[349px]': true, 'max-h-[350px]' : false}" -->
         </div>
     </div>
+
+    <!-- an hidden div is created to set the position of appearance of the right click menu-->
+    <div class="invisible fixed"  [style.left]="menuTopLeftPosition.x"
+    [style.top]="menuTopLeftPosition.y" [matMenuTriggerFor]="rightClickMenu"></div>
+
+    <!-- standard material menu -->
+    <mat-menu #rightClickMenu="matMenu">
+        <button mat-menu-item>
+            <span>Reply</span>
+            <mat-icon class="order-2" fontIcon="reply"></mat-icon>
+        </button>
+
+        <button mat-menu-item (click)="emitEditingMessageId()" *ngIf="messageInfo.messageObj.sender === uid">
+            <span>Edit</span>
+            <mat-icon class="order-2" fontIcon="edit"></mat-icon>
+        </button>
+
+        <button mat-menu-item (click)="deleteMessage()" *ngIf="messageInfo.messageObj.sender === uid">
+            <span>Delete</span>
+            <mat-icon class="order-2" fontIcon="delete"></mat-icon>
+        </button>
+    </mat-menu>
 </div>

@@ -1,6 +1,6 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnDestroy} from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ViewChild, ViewChildren, QueryList} from '@angular/core';
 import {MatIconModule} from '@angular/material/icon';
-import {MatMenuModule} from '@angular/material/menu';
+import {MatMenuModule, MatMenuTrigger} from '@angular/material/menu';
 import {MatButtonModule} from '@angular/material/button';
 import { MessageResponse, User} from '../../interfaces/interfaces';
 import { ChatPageService } from '../chat-page/chat-page.service';
@@ -52,6 +52,21 @@ export class ChatMessage implements OnInit, OnDestroy{
 
   emitEditingMessageId(){
     this.editingMessageId.emit(this.messageInfo.messageObj.id)
+  }
+
+  // specifically to open the right click mat menu
+  menuTopLeftPosition = { x: '0', y: '0' }
+  @ViewChildren(MatMenuTrigger) matMenuTrigger: QueryList<MatMenuTrigger>;
+  onRightClick(event:any) {
+        // preventDefault avoids to show the visualization of the right-click menu of the browser 
+        event.preventDefault();
+
+        // we record the mouse position in our object 
+        this.menuTopLeftPosition.x = event.clientX + 'px';
+        this.menuTopLeftPosition.y = event.clientY + 'px';
+        
+        // we open the correct mat-menu 
+        this.matMenuTrigger.toArray()[1].openMenu();
   }
 
 }
