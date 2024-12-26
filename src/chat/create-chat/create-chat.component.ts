@@ -107,7 +107,7 @@ export class CreateChat implements OnInit, OnDestroy{
     // find the other user's name
     chat.members.forEach(userId => {
       if(userId != selfUid){
-        chatName = this.userInfoDict[userId].username
+        chatName = this.userInfoDict[userId].name
       }
     });
 
