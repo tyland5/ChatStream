@@ -7,6 +7,7 @@ import { ChatList } from '../chat-list/chat-list.component';
 import { Observable, Subscription } from 'rxjs';
 import { ChatPageService } from '../chat-page/chat-page.service';
 import { ChatTabService } from './chat-tab.service';
+import { PersonalUserInfoService } from '../../global-services/personalUserinfo.service';
 
 @Component({
   selector: 'forgot-password',
@@ -23,12 +24,16 @@ export class ChatTab implements OnInit, OnDestroy{
   chatListSubscription: Subscription;
   chatListRxStomp: Subscription;
   activeChatSubscription: Subscription;
+  uid: string;
+  personalUserInfoSubscription:Subscription;
 
   // for mobile rendering 
   onMobile: boolean = window.innerWidth < 768
   showChatPage: boolean = false // initally render the chat list in the mobile view
 
-  constructor(private chatlistService: ChatListService, private chatPageService: ChatPageService, private friendsService: FriendsService, private chatTabService: ChatTabService){
+  constructor(private chatlistService: ChatListService, private chatPageService: ChatPageService, private friendsService: FriendsService, private chatTabService: ChatTabService, 
+    private personalUserInfoService: PersonalUserInfoService){
+      this.personalUserInfoSubscription = this.personalUserInfoService.userInfo.subscribe(info  => this.uid = info.id)
   }
   
   // keeping these calls here because if I switched to mobile view and conditionally rendered chatlist, then these would always execute on init when it shouldn't
@@ -52,7 +57,7 @@ export class ChatTab implements OnInit, OnDestroy{
 
     // this is for any new chats that are created from publish in backend
     // this also considers if a gc has been updated (name, picture)
-    this.chatListRxStomp = this.chatlistService.getChatlistSubscription(localStorage.getItem("uid") as string).subscribe(response => {
+    this.chatListRxStomp = this.chatlistService.getChatlistSubscription(this.uid).subscribe(response => {
       const responseBody: ChatListResponse & {memberObjects: User[]} = JSON.parse(response.body)
       const newChat: ChatListResponse = {...responseBody}
       const usersToAdd: User[] = responseBody.memberObjects
@@ -117,6 +122,7 @@ export class ChatTab implements OnInit, OnDestroy{
     this.chatListSubscription.unsubscribe()
     this.chatListRxStomp.unsubscribe()
     this.activeChatSubscription.unsubscribe()
+    this.personalUserInfoSubscription.unsubscribe()
   }
 
   createChatSubscription(chat: ChatListResponse) : void{

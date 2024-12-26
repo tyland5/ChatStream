@@ -1,16 +1,24 @@
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 import { User } from '../../interfaces/interfaces';
 import { environment } from '../../environments/environment';
+import { PersonalUserInfoService } from '../../global-services/personalUserinfo.service';
 
 @Injectable({
   providedIn: 'root',
 })
-export class FriendsService {
-    csrf: string = localStorage.getItem("csrf") as string;
+export class FriendsService implements OnDestroy{
+    csrf: string;
+    personalUserInfoSubscription:Subscription
 
-    constructor(private http:HttpClient){}
+    constructor(private http:HttpClient, private personalUserInfoService: PersonalUserInfoService){
+      this.personalUserInfoSubscription = this.personalUserInfoService.csrf.subscribe(csrf => this.csrf = csrf)
+    }
+
+    ngOnDestroy(): void {
+      this.personalUserInfoSubscription.unsubscribe()
+    }
 
     
     getFriends(){

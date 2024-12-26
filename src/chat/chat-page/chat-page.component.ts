@@ -14,6 +14,7 @@ import {MatIconModule} from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { ChatInfoModal } from '../chat-info-modal/chat-info-modal.component';
 import { ChatListService } from '../chat-list/chat-list.service';
+import { PersonalUserInfoService } from '../../global-services/personalUserinfo.service';
 
 // A document, including all its embedded documents and arrays, cannot exceed 16MB
 @Component({
@@ -34,6 +35,8 @@ export class ChatPage implements OnDestroy, OnInit{
   uploadedMedia: File | undefined;
   previewImage: string | ArrayBuffer | null = null;
   readonly dialog = inject(MatDialog); // for chat info modal
+  personalUserInfo: User;
+  personalUserInfoSubscription: Subscription;
 
   chatId: string;
   chatName: string;
@@ -45,7 +48,7 @@ export class ChatPage implements OnDestroy, OnInit{
   @ViewChild('autosize') autosize: CdkTextareaAutosize;
   @ViewChild('chatMessages') chatMessages: ElementRef;
 
-  constructor(private chatpageService: ChatPageService, private chatListService: ChatListService, private chatTabService: ChatTabService){}
+  constructor(private chatpageService: ChatPageService, private chatListService: ChatListService, private chatTabService: ChatTabService, private personalUserInfoService: PersonalUserInfoService){}
 
   ngOnInit(): void {
 
@@ -89,6 +92,8 @@ export class ChatPage implements OnDestroy, OnInit{
 
       this.scrollToBottom()
     })
+
+    this.personalUserInfoSubscription = this.personalUserInfoService.userInfo.subscribe(info => this.personalUserInfo = info)
   }
 
 
@@ -98,6 +103,7 @@ export class ChatPage implements OnDestroy, OnInit{
     }
 
     this.activeChatSubscription.unsubscribe();
+    this.personalUserInfoSubscription.unsubscribe();
   }
 
 
@@ -116,7 +122,7 @@ export class ChatPage implements OnDestroy, OnInit{
       return
     }
 
-    const uid = localStorage.getItem('uid') as string;
+    const uid = this.personalUserInfo.id
     this.chatpageService.sendMessage(this.message, this.chatId, uid, this.uploadedMedia)
     this.message = "";
     this.uploadedMedia = undefined;

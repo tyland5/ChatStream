@@ -7,6 +7,7 @@ import { UserListElement } from '../../user/user-list/user-list-element.componen
 import { ChatTabService } from '../chat-tab/chat-tab.service';
 import { Subscription } from 'rxjs';
 import { ChatListService } from '../chat-list/chat-list.service';
+import { PersonalUserInfoService } from '../../global-services/personalUserinfo.service';
 
 @Component({
   selector: 'create-chat',
@@ -21,11 +22,13 @@ export class CreateChat implements OnInit, OnDestroy{
   chatListSubscription: Subscription;
   friendList: User[] = [];
   friendListSubscription: Subscription;
+  uid: string;
+  personalUserInfoSubscription: Subscription;
 
   @Input() userInfoDict: { [id: string]: User } = {}
   @Output() closeCreateChat = new EventEmitter<void>();
 
-  constructor(private chatTabService: ChatTabService, private chatListService: ChatListService){}
+  constructor(private chatTabService: ChatTabService, private chatListService: ChatListService, private personalUserInfoService: PersonalUserInfoService){}
 
   ngOnInit(): void {
     this.friendListSubscription = this.chatTabService.friendList.subscribe(newFriendList =>{
@@ -37,11 +40,14 @@ export class CreateChat implements OnInit, OnDestroy{
     this.chatListSubscription = this.chatTabService.chatList.subscribe(newChatList => {
       this.chatList = newChatList
     })
+
+    this.personalUserInfoSubscription = this.personalUserInfoService.userInfo.subscribe(info => this.uid = info.id)
   }
 
   ngOnDestroy(): void {
     this.friendListSubscription.unsubscribe()
     this.chatListSubscription.unsubscribe()
+    this.personalUserInfoSubscription.unsubscribe()
   }
 
   endCreateChat(): void{
@@ -50,7 +56,7 @@ export class CreateChat implements OnInit, OnDestroy{
 
   createChat(): void{
     let chatExists = false
-    const finalSelectedUsers = new Set([...this.selectedUsers, localStorage.getItem("uid") as string])
+    const finalSelectedUsers = new Set([...this.selectedUsers, this.uid])
 
     for(let i =0; i< this.chatList.length; i++){
       const chat = this.chatList[i]
@@ -95,13 +101,13 @@ export class CreateChat implements OnInit, OnDestroy{
       return chat.chatName as string
     }
 
-    const selfUid = localStorage.getItem("uid")
+    const selfUid = this.uid
     let chatName: string = ""
 
     // find the other user's name
     chat.members.forEach(userId => {
       if(userId != selfUid){
-        chatName = this.userInfoDict[userId].username
+        chatName = this.userInfoDict[userId].name
       }
     });
 

@@ -1,4 +1,4 @@
-import { HttpRequest, HttpHandlerFn, HttpEvent, HttpEventType, HttpErrorResponse} from "@angular/common/http";
+import { HttpRequest, HttpHandlerFn, HttpEvent, HttpErrorResponse} from "@angular/common/http";
 import { Observable } from "rxjs";
 import { inject } from "@angular/core";
 import { Router } from "@angular/router";
@@ -11,11 +11,11 @@ export function loggingInterceptor(req: HttpRequest<unknown>, next: HttpHandlerF
     
     return next(req).pipe(
         catchError((error: HttpErrorResponse) => {
-            // if we get a 401 with from an api other than check credentials, redirect to login.
-            // this assumes this is from an expired session. tampering with csrf token doesn't make a user considered logged out thus doesnt redirect 
+            // if we get a 401 with from an api other than check credentials, redirect to login. this assumes bc of an expired session. 
+            // tampering with csrf token and refreshing page makes auth-guard fail and redirect to login page.  
             if (error.status === 401 && !error.url?.endsWith("check-credentials")) {
-                //localStorage.clear()
-                router.navigate(['/login']); 
+                localStorage.clear()
+                router.navigate(['/login'])
             }
             return throwError(error);
         })
