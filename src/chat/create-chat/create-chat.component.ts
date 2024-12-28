@@ -97,7 +97,7 @@ export class CreateChat implements OnInit, OnDestroy{
   }
 
   getChatName(chat: ChatListResponse): string{
-    if(chat.members.length > 2){
+    if(chat.chatName != ""){
       return chat.chatName as string
     }
 

@@ -9,7 +9,8 @@
         </div>
 
         <div *ngFor="let chat of chatList">
-            <chatlist-element [chatName]="getChatName(chat)" [chatPic]="getChatPic(chat)" [chatId]="getChatId(chat)" [isActive]="chat.id === activeChatId" [latestMessage]="getLatestMessage(chat)" [members]="chat.members" ></chatlist-element>
+            <chatlist-element [chatName]="getChatName(chat)" [chatPic]="getChatPic(chat)" [chatId]="getChatId(chat)" [isActive]="chat.id === activeChatId" [latestMessage]="getLatestMessage(chat)" 
+            [members]="chat.members" [isGroupChat]="chat.chatName !== ''"></chatlist-element>
         </div>
     </div>
 

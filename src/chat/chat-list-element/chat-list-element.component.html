@@ -1,5 +1,5 @@
 
-<div (click)="changeActiveChat()" [ngClass]="{'bg-gray-600': this.isActive === true}"
+<div  (contextmenu)="onRightClick($event)" (click)="changeActiveChat()" [ngClass]="{'bg-gray-600': this.isActive === true}"
 class="flex gap-[10px] items-center flex-nowrap text-ellipsis hover:bg-gray-600 mb-[16px] cursor-pointer">
     <img class="h-[40px] w-[40px] bg-white rounded-full" [src]="chatPic"/>
 
@@ -9,4 +9,21 @@ class="flex gap-[10px] items-center flex-nowrap text-ellipsis hover:bg-gray-600 
         <p class="text-ellipsis overflow-hidden whitespace-nowrap dark:text-gray-300">{{ latestMessage.name !== "" ? latestMessage.name + ": " + 
         ((latestMessage.message !== "") ? latestMessage.message : "Media Sent") : "No messages"}}</p>
     </div>
+
+
+    <!-- an hidden div is created to set the position of appearance of the right click menu-->
+    <div class="invisible fixed"  [style.left]="menuTopLeftPosition.x"
+    [style.top]="menuTopLeftPosition.y" [matMenuTriggerFor]="rightClickMenu"></div>
+
+    <!-- standard material menu -->
+    <mat-menu #rightClickMenu="matMenu">
+        <button mat-menu-item>
+            <span>Hide Chat</span>
+            <mat-icon class="order-2" fontIcon="close"></mat-icon>
+        </button>
+        <button *ngIf="isGroupChat" mat-menu-item>
+            <span>Exit Group</span>
+            <mat-icon class="order-2" fontIcon="logout"></mat-icon>
+        </button>
+    </mat-menu>
 </div>
