@@ -74,6 +74,9 @@ export class CreateChat implements OnInit, OnDestroy{
 
       if(correctChat){
         chatExists = true
+        if(chat?.hidden && chat.hidden.includes(this.uid)){
+          this.chatTabService.unhideChat(chat.id)
+        }
         this.chatTabService.updateActiveChat({chatId: chat.id, chatName: this.getChatName(chat), members: this.chatList[i].members})
         break
       }

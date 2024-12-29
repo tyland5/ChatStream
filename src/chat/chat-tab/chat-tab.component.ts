@@ -141,7 +141,7 @@ export class ChatTab implements OnInit, OnDestroy{
 
       const messageProperty = messageObj.type === "delete" ? "Message Deleted" : messageObj.message
       const senderIdProperty = messageObj.type === "create" ? messageObj.sender : this.chatList[index].latestMessage.uid
-      this.chatList[index] = {...this.chatList[index], latestMessage:{uid: senderIdProperty, message: messageProperty, messageId: messageObj.id}}
+      this.chatList[index] = {...this.chatList[index], latestMessage:{uid: senderIdProperty, message: messageProperty, messageId: messageObj.id}, hidden:[]}
 
       // if someone edits or delete a message, we dont want the chat to appear at the top since not important
       if(messageObj.type === "create"){

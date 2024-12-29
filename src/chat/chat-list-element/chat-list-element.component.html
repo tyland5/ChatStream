@@ -17,7 +17,7 @@ class="flex gap-[10px] items-center flex-nowrap text-ellipsis hover:bg-gray-600 
 
     <!-- standard material menu -->
     <mat-menu #rightClickMenu="matMenu">
-        <button mat-menu-item>
+        <button mat-menu-item (click)="hideChat()">
             <span>Hide Chat</span>
             <mat-icon class="order-2" fontIcon="close"></mat-icon>
         </button>

@@ -16,6 +16,7 @@ export interface ChatListResponse{
     },
     chatName ?: string,
     chatPic ?: string
+    hidden?: string[]
 }
 
 export interface User{

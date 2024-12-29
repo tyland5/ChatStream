@@ -30,18 +30,23 @@ export class ChatListElement implements OnInit {
     this.chatTabService.updateActiveChat({chatId: this.chatId, chatName: this.chatName, members: this.members})
   }
 
-  // specifically to open the right click mat menu
-    menuTopLeftPosition = { x: '0', y: '0' }
-    @ViewChild(MatMenuTrigger, { static: true }) matMenuTrigger: MatMenuTrigger;
-    onRightClick(event:any) {
-          // preventDefault avoids to show the visualization of the right-click menu of the browser 
-          event.preventDefault();
+  hideChat(){
+    this.chatTabService.hideChat(this.chatId)
+  }
   
-          // we record the mouse position in our object 
-          this.menuTopLeftPosition.x = event.clientX + 'px';
-          this.menuTopLeftPosition.y = event.clientY + 'px';
-          
-          // we open the correct mat-menu 
-          this.matMenuTrigger.openMenu();
-    }
+
+  // specifically to open the right click mat menu
+  menuTopLeftPosition = { x: '0', y: '0' }
+  @ViewChild(MatMenuTrigger, { static: true }) matMenuTrigger: MatMenuTrigger;
+  onRightClick(event:any) {
+        // preventDefault avoids to show the visualization of the right-click menu of the browser 
+        event.preventDefault();
+
+        // we record the mouse position in our object 
+        this.menuTopLeftPosition.x = event.clientX + 'px';
+        this.menuTopLeftPosition.y = event.clientY + 'px';
+        
+        // we open the correct mat-menu 
+        this.matMenuTrigger.openMenu();
+  }
 } 
