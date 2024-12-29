@@ -1,4 +1,4 @@
-import {Component, inject, Injector, ViewChild, ElementRef, Input, Output, OnInit, OnDestroy, EventEmitter} from '@angular/core';
+import {Component, inject, Injector, ViewChild, ElementRef, Input, Output, OnInit, OnDestroy, EventEmitter, OnChanges, SimpleChanges} from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import {CdkTextareaAutosize, TextFieldModule} from '@angular/cdk/text-field';
@@ -24,7 +24,7 @@ import { PersonalUserInfoService } from '../../global-services/personalUserinfo.
   templateUrl: './chat-page.component.html',
   styleUrl: './chat-page.component.scss',
 })
-export class ChatPage implements OnDestroy, OnInit{
+export class ChatPage implements OnDestroy, OnInit, OnChanges{
   private _injector = inject(Injector);
   onMobile: boolean = window.innerWidth < 768
   message: string = "";
@@ -38,9 +38,10 @@ export class ChatPage implements OnDestroy, OnInit{
   personalUserInfo: User;
   personalUserInfoSubscription: Subscription;
 
-  chatId: string;
-  chatName: string;
-  members: string[];
+  @Input() chatId: string;
+  @Input() chatName: string;
+  @Input() members: string[];
+  @Input() isGc: boolean;
 
   // might need input that specifies if private chat or public
   @Input() userInfoDict:  { [id: string]: User }; // should be initialized in ngoninit for public
@@ -48,15 +49,16 @@ export class ChatPage implements OnDestroy, OnInit{
   @ViewChild('autosize') autosize: CdkTextareaAutosize;
   @ViewChild('chatMessages') chatMessages: ElementRef;
 
-  constructor(private chatpageService: ChatPageService, private chatListService: ChatListService, private chatTabService: ChatTabService, private personalUserInfoService: PersonalUserInfoService){}
+  constructor(private chatpageService: ChatPageService, private chatListService: ChatListService, private personalUserInfoService: PersonalUserInfoService){}
 
   ngOnInit(): void {
+    this.personalUserInfoSubscription = this.personalUserInfoService.userInfo.subscribe(info => this.personalUserInfo = info)
+  }
 
-    // get messages for chat that has just been selected
-    this.activeChatSubscription = this.chatTabService.activeChat.subscribe(newActiveChat => {
-      this.chatId = newActiveChat.chatId
-      this.chatName = newActiveChat.chatName
-      this.members = newActiveChat.members
+  ngOnChanges(changes: SimpleChanges): void {
+
+    // chat has been changed so switch
+    if(changes['chatId'].currentValue !== changes['chatId'].previousValue){
       this.message = "";
       this.editingMessageId = "",
       this.uploadedMedia = undefined;
@@ -91,9 +93,7 @@ export class ChatPage implements OnDestroy, OnInit{
       })
 
       this.scrollToBottom()
-    })
-
-    this.personalUserInfoSubscription = this.personalUserInfoService.userInfo.subscribe(info => this.personalUserInfo = info)
+    }
   }
 
 
@@ -102,7 +102,6 @@ export class ChatPage implements OnDestroy, OnInit{
       this.stompSubscription.unsubscribe(); // necessary
     }
 
-    this.activeChatSubscription.unsubscribe();
     this.personalUserInfoSubscription.unsubscribe();
   }
 

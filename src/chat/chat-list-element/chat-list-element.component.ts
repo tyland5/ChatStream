@@ -5,6 +5,7 @@ import { ChatTabService } from '../chat-tab/chat-tab.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
+import { ChatListService } from '../chat-list/chat-list.service';
 
 @Component({
   selector: 'chatlist-element',
@@ -19,19 +20,23 @@ export class ChatListElement implements OnInit {
   @Input() chatId: string = "";
   @Input() members: string[] = [];
   @Input() isActive: Boolean = false;
-  @Input() isGroupChat: Boolean;
+  @Input() isGroupChat: boolean;
   
-  constructor(private chatTabService: ChatTabService){}
+  constructor(private chatTabService: ChatTabService, private chatListService: ChatListService){}
 
   ngOnInit(): void {
   }
 
   changeActiveChat(){
-    this.chatTabService.updateActiveChat({chatId: this.chatId, chatName: this.chatName, members: this.members})
+    this.chatTabService.updateActiveChat({chatId: this.chatId, chatName: this.chatName, members: this.members, isGc: this.isGroupChat})
   }
 
   hideChat(){
     this.chatTabService.hideChat(this.chatId)
+  }
+
+  leaveGc(){
+    this.chatListService.leaveGroupChat(this.chatId);
   }
   
 

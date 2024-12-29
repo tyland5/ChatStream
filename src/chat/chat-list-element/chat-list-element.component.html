@@ -21,7 +21,7 @@ class="flex gap-[10px] items-center flex-nowrap text-ellipsis hover:bg-gray-600 
             <span>Hide Chat</span>
             <mat-icon class="order-2" fontIcon="close"></mat-icon>
         </button>
-        <button *ngIf="isGroupChat" mat-menu-item>
+        <button *ngIf="isGroupChat" mat-menu-item (click)="leaveGc()">
             <span>Exit Group</span>
             <mat-icon class="order-2" fontIcon="logout"></mat-icon>
         </button>

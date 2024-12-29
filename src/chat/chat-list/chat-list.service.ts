@@ -83,4 +83,13 @@ export class ChatListService implements OnDestroy {
             }
         })
     }
+
+    leaveGroupChat(chatId: string){
+        this.http.put<{updated:boolean}>(environment.apiBaseUrl + "/leave-gc", {chatId: chatId}, {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
+        .subscribe(response=>{
+            if(response.updated){
+                console.log("Worked")
+            }
+        })
+    }
 }

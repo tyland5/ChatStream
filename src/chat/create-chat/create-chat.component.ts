@@ -77,7 +77,7 @@ export class CreateChat implements OnInit, OnDestroy{
         if(chat?.hidden && chat.hidden.includes(this.uid)){
           this.chatTabService.unhideChat(chat.id)
         }
-        this.chatTabService.updateActiveChat({chatId: chat.id, chatName: this.getChatName(chat), members: this.chatList[i].members})
+        this.chatTabService.updateActiveChat({chatId: chat.id, chatName: this.getChatName(chat), members: this.chatList[i].members, isGc: true ? (chat.hasOwnProperty("chatName") && chat.chatName !== "") : false})
         break
       }
     }
@@ -86,7 +86,7 @@ export class CreateChat implements OnInit, OnDestroy{
       const finalSelectedUsersArray: string[] = Array.from(finalSelectedUsers) //ids
       const finalSelectedUsersInfo: User[] = finalSelectedUsersArray.map(userId=> {return this.userInfoDict[userId]})
 
-      this.chatTabService.updateActiveChat({chatId: "", chatName: "", members: [] as string[]})
+      this.chatTabService.updateActiveChat({chatId: "", chatName: "", members: [] as string[], isGc: false})
       this.chatListService.createNewChat(finalSelectedUsersArray, finalSelectedUsersInfo)
     }
 

@@ -19,7 +19,7 @@ export class ChatTab implements OnInit, OnDestroy{
   chatList: ChatListResponse[] = []
   userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
   creatingNewChat: boolean = false
-  activeChat: ActiveChat = {} as ActiveChat
+  activeChat: ActiveChat = {chatId:"",  chatName:"", members:[], isGc:  false}
   chatSubscriptions : Subscription[] = []
   chatListSubscription: Subscription;
   chatListRxStomp: Subscription;
@@ -43,8 +43,8 @@ export class ChatTab implements OnInit, OnDestroy{
     this.activeChatSubscription = this.chatTabService.activeChat.subscribe(currentChat =>{
       if(currentChat.chatId !== ""){
         this.showChatPage = true
-        this.activeChat = currentChat
       } 
+      this.activeChat = currentChat
     })
 
 
@@ -55,7 +55,7 @@ export class ChatTab implements OnInit, OnDestroy{
     })
 
 
-    // this is for any new chats that are created from publish in backend
+    // this is for any new chats that are created from publish in backend (both single and gc)
     // this also considers if a gc has been updated (name, picture)
     this.chatListRxStomp = this.chatlistService.getChatlistSubscription(this.uid).subscribe(response => {
       const responseBody: ChatListResponse & {memberObjects: User[]} = JSON.parse(response.body)
@@ -71,7 +71,7 @@ export class ChatTab implements OnInit, OnDestroy{
         const newChatList = [updatedChat, ...this.chatList.filter((chat) => chat.id != newChat.id)]
         this.chatTabService.updateChatList(newChatList)
         
-        // this is primarily for other user. if the chat is pulled up when another changes chat name, we need to force update it
+        // this is primarily for other user. if the chat is displayed when another changes chat name, we need to force update the name
         // through the active chat since chat page uses that name property
         if(this.activeChat.chatId == newChat.id){
           this.chatTabService.updateActiveChat({...this.activeChat, chatName: newChat.chatName as string})
@@ -128,7 +128,7 @@ export class ChatTab implements OnInit, OnDestroy{
   createChatSubscription(chat: ChatListResponse) : void{
     // create observable for this component and chat page component first
     const chatPubSub = this.chatPageService.changeSubscription(chat.id)
-
+    
     // whenever a message update comes from a chat, check if you need to update the chatlist element (moving it on top or updating recent message)
     const chatSub = chatPubSub.subscribe(message => {
       const messageObj: MessageResponse= JSON.parse(message.body)

@@ -45,5 +45,6 @@ export interface MessageResponse{
 export interface ActiveChat{
     chatId: string,
     chatName: string,
-    members: string[]
+    members: string[],
+    isGc: boolean
 }

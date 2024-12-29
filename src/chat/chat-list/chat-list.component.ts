@@ -67,7 +67,7 @@ export class ChatList implements OnInit, OnDestroy{
   }
 
   getChatPic(chat: ChatListResponse): string{
-    if(chat.members.length > 2){
+    if(chat.chatName != ""){
       return chat.chatPic as string
     }
 

@@ -23,15 +23,14 @@ export class EmailVerification implements OnInit{
 
   ngOnInit(): void {
     if(this.purpose ==="register"){
-      this.emailVerificationService.sendVerificationCodeRegister(this.recipientEmail, this.verificationCode).subscribe(sent=>{console.log(sent)})
+      this.emailVerificationService.sendVerificationCodeRegister(this.recipientEmail, this.verificationCode).subscribe(sent=>{})
     }
     else{
-      this.emailVerificationService.sendVerificationCodeForgotPW(this.recipientEmail, this.verificationCode).subscribe(sent=>{console.log(sent)})
+      this.emailVerificationService.sendVerificationCodeForgotPW(this.recipientEmail, this.verificationCode).subscribe(sent=>{})
     }
   }
 
   checkCode(){
-    console.log(this.verificationCode)
     if(this.inputtedCode !== this.verificationCode){
       this.showWrongCodeErr = true
       return

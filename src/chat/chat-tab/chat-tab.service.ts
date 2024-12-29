@@ -10,7 +10,7 @@ import { HttpClient } from "@angular/common/http";
 export class ChatTabService implements OnDestroy{
     chatList: BehaviorSubject<ChatListResponse[]> = new BehaviorSubject([] as ChatListResponse[])
     friendList: BehaviorSubject<User[]> = new BehaviorSubject([] as User[])
-    activeChat: BehaviorSubject<ActiveChat> = new BehaviorSubject({chatId:"", chatName: "", members:[] as string[]})
+    activeChat: BehaviorSubject<ActiveChat> = new BehaviorSubject({chatId:"", chatName: "", isGc: false, members:[] as string[]} as ActiveChat)
 
     personalUserInfoServiceSubscription: Subscription
     csrfSubscription: Subscription
@@ -43,7 +43,7 @@ export class ChatTabService implements OnDestroy{
         const filteredChatList = this.chatList.value.filter(chat => chat.id != chatId)
         
         if(this.activeChat.value.chatId === chatId){
-            this.activeChat.next({chatId:"", chatName: "", members:[] as string[]})
+            this.activeChat.next({chatId:"", chatName: "", members:[] as string[], isGc:false})
         }
 
         this.chatList.next(filteredChatList)
@@ -56,16 +56,16 @@ export class ChatTabService implements OnDestroy{
             if(!response.updated){
                 return
             }
-            
+
             const modifiedChatList = this.chatList.value.map(chat =>{
                 if(chat.id === chatId){
                     return{...chat, hidden:[this.uid]}
                 }
                 return chat
             })
-            
+           
             if(this.activeChat.value.chatId === chatId){
-                this.activeChat.next({chatId:"", chatName: "", members:[] as string[]})
+                this.activeChat.next({chatId:"", chatName: "", members:[] as string[], isGc: false})
             }
     
             this.chatList.next(modifiedChatList)
@@ -84,10 +84,6 @@ export class ChatTabService implements OnDestroy{
                 }
                 return chat
             })
-            
-            if(this.activeChat.value.chatId === chatId){
-                this.activeChat.next({chatId:"", chatName: "", members:[] as string[]})
-            }
 
             this.chatList.next(modifiedChatList)
         })
