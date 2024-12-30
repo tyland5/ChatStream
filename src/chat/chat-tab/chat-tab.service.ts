@@ -4,6 +4,7 @@ import { BehaviorSubject, Subscription } from "rxjs";
 import { PersonalUserInfoService } from "../../global-services/personalUserinfo.service";
 import { environment } from "../../environments/environment";
 import { HttpClient } from "@angular/common/http";
+import { RxStompServiceBase, RxStompService} from "../../global-services/rxstomp.service";
 
 // ONLY ALLOWED TO BE USED IN THE PRIVATE CHAT TAB
 @Injectable()
@@ -17,9 +18,12 @@ export class ChatTabService implements OnDestroy{
     uid: string;
     csrf: string;
 
-    constructor(private personalUserInfoService:  PersonalUserInfoService, private http: HttpClient){
+    rxStomp: RxStompServiceBase;
+
+    constructor(private personalUserInfoService:  PersonalUserInfoService, private http: HttpClient, private rxStompService: RxStompService){
         this.personalUserInfoServiceSubscription = this.personalUserInfoService.userInfo.subscribe(info=> this.uid = info.id)
         this.csrfSubscription = this.personalUserInfoService.csrf.subscribe(csrf=> this.csrf = csrf)
+        this.rxStomp = this.rxStompService.getConnection()
     }
 
     ngOnDestroy(): void {
@@ -38,6 +42,15 @@ export class ChatTabService implements OnDestroy{
         this.activeChat.next(newActiveChat)
     }
 
+    leaveGroupChat(chatId: string){
+        this.http.put<{updated:boolean}>(environment.apiBaseUrl + "/leave-gc", {chatId: chatId}, {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
+        .subscribe(response=>{
+            if(response.updated){
+                this.removeChat(chatId)
+                this.rxStomp.publish({destination: "/chat/updateGcInfo/" + chatId, body:JSON.stringify({chatId: chatId, sender: this.uid, type:"leave"})})
+            }
+        })
+    }
     // for leaving gc
     removeChat(chatId:string){
         const filteredChatList = this.chatList.value.filter(chat => chat.id != chatId)

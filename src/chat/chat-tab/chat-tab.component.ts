@@ -20,7 +20,7 @@ export class ChatTab implements OnInit, OnDestroy{
   userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
   creatingNewChat: boolean = false
   activeChat: ActiveChat = {chatId:"",  chatName:"", members:[], isGc:  false}
-  chatSubscriptions : Subscription[] = []
+  chatSubscriptions : {[key:string]: Subscription} = {} // dictionary in case a user leaves a group chat. need to unsubscribe
   chatListSubscription: Subscription;
   chatListRxStomp: Subscription;
   activeChatSubscription: Subscription;
@@ -115,7 +115,7 @@ export class ChatTab implements OnInit, OnDestroy{
   }
 
   ngOnDestroy(): void {
-    this.chatSubscriptions.forEach(subscription => {
+    Object.values(this.chatSubscriptions).forEach(subscription => {
       subscription.unsubscribe()
     })
 
@@ -125,14 +125,38 @@ export class ChatTab implements OnInit, OnDestroy{
     this.personalUserInfoSubscription.unsubscribe()
   }
 
+  // this is strictly management of chatlist info
   createChatSubscription(chat: ChatListResponse) : void{
     // create observable for this component and chat page component first
     const chatPubSub = this.chatPageService.changeSubscription(chat.id)
     
-    // whenever a message update comes from a chat, check if you need to update the chatlist element (moving it on top or updating recent message)
+    // whenever a message update comes from a chat, check if you need to update the CHATLIST element (moving it on top or updating recent message)
     const chatSub = chatPubSub.subscribe(message => {
       const messageObj: MessageResponse= JSON.parse(message.body)
       const index = this.chatList.findIndex((chat) => chat.id === messageObj.chatId)
+
+      // this is related to anything that updates the group chat info. live updates on info doesnt return message id
+      if(messageObj.id === ""){
+
+        if(messageObj.type === "leave"){
+          if(messageObj.sender === this.uid){
+            this.chatSubscriptions[messageObj.chatId].unsubscribe() // we actually delete it from chat list in the original call. this is to remove the subscription
+          }
+          else{
+            const newMemberList = this.chatList[index].members.filter(id => id != messageObj.sender)
+            this.chatList[index].members = newMemberList
+            this.chatTabService.updateChatList([...this.chatList])
+            
+            if(this.activeChat.chatId === messageObj.chatId){ //required in case user has the gc open. the modal wont reflect the user leaving without this
+              this.chatTabService.updateActiveChat({...this.activeChat, members:newMemberList})
+            }
+          }
+        }
+
+
+        return
+      }
+
 
       // if message was edited or deleted and was not the most recent, we dont care about updating chatlist
       if(messageObj.type !== "create" && messageObj.id !== this.chatList[index].latestMessage.messageId){
@@ -152,6 +176,6 @@ export class ChatTab implements OnInit, OnDestroy{
       }
     })
 
-    this.chatSubscriptions.push(chatSub)
+    this.chatSubscriptions[chat.id] = chatSub
   }
 }
