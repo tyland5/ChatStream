@@ -67,19 +67,14 @@ export class ChatListService implements OnDestroy {
        
     }
 
-    // this is primarily for group chats right now and name. should incorporate picture
+    // this is primarily for group chat name. should incorporate picture later
     // other users get real time update of when another user changes the name or picture of a group chat
-    updateChatInfo(chatName: string, chatId: string, chatMembers:string[]){
-        const chatObj: ChatListResponse = {id:chatId, chatName: chatName, members:chatMembers, latestMessage:{uid:"", messageId:"", message:""}}
-        const memberObj: User[] = []
-        const updatedChat = {...chatObj, memberObjects: memberObj}
-        
+    updateChatInfo(chatName: string, chatId: string){
+    
         this.http.put<{updated: boolean}>(environment.apiBaseUrl + "/update-gc-info", {id: chatId, chatName: chatName}, {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
         .subscribe(response=>{
             if(response.updated){
-                chatMembers.forEach(member => {
-                    this.rxStomp.publish({destination: '/chatlist/updateChatlist/' + member,  body: JSON.stringify(updatedChat)})
-                })
+                this.rxStomp.publish({destination: '/chat/updateGcInfo/' + chatId,  body: JSON.stringify({chatId: chatId, message:chatName, type:"update name"})})
             }
         })
     }

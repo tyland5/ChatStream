@@ -62,24 +62,6 @@ export class ChatTab implements OnInit, OnDestroy{
       const newChat: ChatListResponse = {...responseBody}
       const usersToAdd: User[] = responseBody.memberObjects
 
-      // if a group chat has been updated, memberObjects will be empty 
-      if(usersToAdd.length == 0){
-        const chatIndex = this.chatList.findIndex((chat) => chat.id === newChat.id)
-        const updatedChat = this.chatList[chatIndex]
-        updatedChat.chatName = newChat.chatName
-       
-        const newChatList = [updatedChat, ...this.chatList.filter((chat) => chat.id != newChat.id)]
-        this.chatTabService.updateChatList(newChatList)
-        
-        // this is primarily for other user. if the chat is displayed when another changes chat name, we need to force update the name
-        // through the active chat since chat page uses that name property
-        if(this.activeChat.chatId == newChat.id){
-          this.chatTabService.updateActiveChat({...this.activeChat, chatName: newChat.chatName as string})
-        }
-        
-        return 
-      }
-
       // in case friend adds you to a gc w/ non mutual friends. need to add users to userinfodict for proper rendering
       usersToAdd.forEach(user=>this.userInfoDict[user.id] = user)
 
@@ -178,6 +160,20 @@ export class ChatTab implements OnInit, OnDestroy{
       this.chatTabService.updateChatList([...this.chatList])
       if(this.activeChat.chatId === messageObj.chatId){ //required in case user has the gc open. the modal wont reflect the user leaving without this
         this.chatTabService.updateActiveChat({...this.activeChat, members: this.chatList[index].members})
+      }
+    }
+
+    else if(messageObj.type === "update name"){
+      const updatedChat = this.chatList[index]
+      updatedChat.chatName = messageObj.message
+      
+      const newChatList = [updatedChat, ...this.chatList.filter((chat) => chat.id != updatedChat.id)]
+      this.chatTabService.updateChatList(newChatList)
+      
+      // this is primarily for other user. if the chat is displayed when another changes chat name, we need to force update the name
+      // through the active chat since chat page uses that name property
+      if(this.activeChat.chatId == updatedChat.id){
+        this.chatTabService.updateActiveChat({...this.activeChat, chatName: messageObj.message})
       }
     }
   }

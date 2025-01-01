@@ -56,9 +56,8 @@ export class ChatPage implements OnDestroy, OnInit, OnChanges{
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-
     // chat has been changed so switch
-    if(changes['chatId'].currentValue !== changes['chatId'].previousValue){
+    if(changes['chatId'] !== undefined && changes['chatId'].currentValue !== changes['chatId'].previousValue){
       this.message = "";
       this.editingMessageId = "",
       this.uploadedMedia = undefined;
@@ -183,7 +182,7 @@ export class ChatPage implements OnDestroy, OnInit, OnChanges{
       // result is just a string (chatname) right now
       if (result !== undefined) {
         this.chatName = result
-        this.chatListService.updateChatInfo(result, this.chatId, this.members)
+        this.chatListService.updateChatInfo(result, this.chatId)
       }
     });
 
