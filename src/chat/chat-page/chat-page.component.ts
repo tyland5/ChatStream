@@ -86,7 +86,7 @@ export class ChatPage implements OnDestroy, OnInit, OnChanges{
         else if(messageObj.type === "delete"){
           this.chatHistory = this.chatHistory.filter(message => message.id !== messageObj.id)
         }
-        else{
+        else if(messageObj.type === "edit"){
           const index = this.chatHistory.findIndex(message => message.id === messageObj.id)
           this.chatHistory[index].message = messageObj.message
         }
@@ -174,7 +174,8 @@ export class ChatPage implements OnDestroy, OnInit, OnChanges{
       width:"500px", // need this because making screen width smaller clips out buttons and input without it
       data: {
         members: memberList,
-        chatName: this.chatName
+        chatName: this.chatName,
+        chatId: this.chatId
       },
     });
 

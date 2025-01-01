@@ -125,7 +125,8 @@ export class ChatTab implements OnInit, OnDestroy{
     this.personalUserInfoSubscription.unsubscribe()
   }
 
-  // this is strictly management of chatlist info
+  // this is strictly for any updates to chatlist thanks to updates of a chat: members joining/leaving, new messages coming in
+  // chat page will have to handle members leaving and joining when in chat room tab
   createChatSubscription(chat: ChatListResponse) : void{
     // create observable for this component and chat page component first
     const chatPubSub = this.chatPageService.changeSubscription(chat.id)
@@ -137,45 +138,66 @@ export class ChatTab implements OnInit, OnDestroy{
 
       // this is related to anything that updates the group chat info. live updates on info doesnt return message id
       if(messageObj.id === ""){
-
-        if(messageObj.type === "leave"){
-          if(messageObj.sender === this.uid){
-            this.chatSubscriptions[messageObj.chatId].unsubscribe() // we actually delete it from chat list in the original call. this is to remove the subscription
-          }
-          else{
-            const newMemberList = this.chatList[index].members.filter(id => id != messageObj.sender)
-            this.chatList[index].members = newMemberList
-            this.chatTabService.updateChatList([...this.chatList])
-            
-            if(this.activeChat.chatId === messageObj.chatId){ //required in case user has the gc open. the modal wont reflect the user leaving without this
-              this.chatTabService.updateActiveChat({...this.activeChat, members:newMemberList})
-            }
-          }
-        }
-
-
-        return
+        this.updateGcInfo(messageObj, index)
       }
-
-
-      // if message was edited or deleted and was not the most recent, we dont care about updating chatlist
-      if(messageObj.type !== "create" && messageObj.id !== this.chatList[index].latestMessage.messageId){
-        return
-      }
-
-      const messageProperty = messageObj.type === "delete" ? "Message Deleted" : messageObj.message
-      const senderIdProperty = messageObj.type === "create" ? messageObj.sender : this.chatList[index].latestMessage.uid
-      this.chatList[index] = {...this.chatList[index], latestMessage:{uid: senderIdProperty, message: messageProperty, messageId: messageObj.id}, hidden:[]}
-
-      // if someone edits or delete a message, we dont want the chat to appear at the top since not important
-      if(messageObj.type === "create"){
-        this.chatTabService.updateChatList([this.chatList[index], ...this.chatList.slice(0, index), ...this.chatList.slice(index+1)]) // slice handles out of bounds 
-      }
+      // any updates to message list: create, edit, delete
       else{
-        this.chatTabService.updateChatList([...this.chatList])
+        this.updateMessageList(messageObj, index)
       }
     })
 
     this.chatSubscriptions[chat.id] = chatSub
+  }
+
+
+  updateGcInfo(messageObj: MessageResponse, index: number){
+    if(messageObj.type === "leave"){
+      // if the user themselves are leaving
+      if(messageObj.sender === this.uid){
+        this.chatSubscriptions[messageObj.chatId].unsubscribe() // this is to remove the subscription so we dont get new messages
+        this.chatTabService.removeChat(messageObj.chatId) // this is to remove chat from chat list
+      }
+      else{
+        const newMemberList = this.chatList[index].members.filter(id => id != messageObj.sender)
+        this.chatList[index].members = newMemberList
+        
+        if(this.activeChat.chatId === messageObj.chatId){ //required in case user has the gc open. the modal wont reflect the user leaving without this
+          this.chatTabService.updateActiveChat({...this.activeChat, members:newMemberList})
+        }
+      }
+    }
+
+    else if(messageObj.type === "add"){
+      const usersToAdd: User[] = JSON.parse(messageObj.message) 
+      
+      usersToAdd.forEach(user => {
+        this.chatList[index].members.push(user.id)
+        this.userInfoDict[user.id] = user
+      })
+
+      this.chatTabService.updateChatList([...this.chatList])
+      if(this.activeChat.chatId === messageObj.chatId){ //required in case user has the gc open. the modal wont reflect the user leaving without this
+        this.chatTabService.updateActiveChat({...this.activeChat, members: this.chatList[index].members})
+      }
+    }
+  }
+
+  updateMessageList(messageObj:MessageResponse, index: number){
+    // if message was edited or deleted and was not the most recent, we dont care about updating chatlist
+    if(messageObj.type !== "create" && messageObj.id !== this.chatList[index].latestMessage.messageId){
+      return
+    }
+
+    const messageProperty = messageObj.type === "delete" ? "Message Deleted" : messageObj.message
+    const senderIdProperty = messageObj.type === "create" ? messageObj.sender : this.chatList[index].latestMessage.uid
+    this.chatList[index] = {...this.chatList[index], latestMessage:{uid: senderIdProperty, message: messageProperty, messageId: messageObj.id}, hidden:[]}
+
+    // if someone edits or delete a message, we dont want the chat to appear at the top since not important
+    if(messageObj.type === "create"){
+      this.chatTabService.updateChatList([this.chatList[index], ...this.chatList.slice(0, index), ...this.chatList.slice(index+1)]) // slice handles out of bounds 
+    }
+    else{
+      this.chatTabService.updateChatList([...this.chatList])
+    }
   }
 }

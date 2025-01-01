@@ -5,6 +5,7 @@ import { ChatTabService } from '../chat-tab/chat-tab.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
+import { ChatInfoModalService } from '../chat-info-modal/chat-info-modal.service';
 
 @Component({
   selector: 'chatlist-element',
@@ -21,7 +22,7 @@ export class ChatListElement implements OnInit {
   @Input() isActive: Boolean = false;
   @Input() isGroupChat: boolean;
   
-  constructor(private chatTabService: ChatTabService){}
+  constructor(private chatTabService: ChatTabService, private chatInfoModalService: ChatInfoModalService){}
 
   ngOnInit(): void {
   }
@@ -35,7 +36,7 @@ export class ChatListElement implements OnInit {
   }
 
   leaveGc(){
-    this.chatTabService.leaveGroupChat(this.chatId);
+    this.chatInfoModalService.leaveGroupChat(this.chatId);
   }
   
 

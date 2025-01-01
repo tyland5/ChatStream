@@ -42,15 +42,6 @@ export class ChatTabService implements OnDestroy{
         this.activeChat.next(newActiveChat)
     }
 
-    leaveGroupChat(chatId: string){
-        this.http.put<{updated:boolean}>(environment.apiBaseUrl + "/leave-gc", {chatId: chatId}, {responseType:"json", withCredentials: true, headers:{"csrf": this.csrf}})
-        .subscribe(response=>{
-            if(response.updated){
-                this.removeChat(chatId)
-                this.rxStomp.publish({destination: "/chat/updateGcInfo/" + chatId, body:JSON.stringify({chatId: chatId, sender: this.uid, type:"leave"})})
-            }
-        })
-    }
     // for leaving gc
     removeChat(chatId:string){
         const filteredChatList = this.chatList.value.filter(chat => chat.id != chatId)
