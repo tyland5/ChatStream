@@ -1,8 +1,26 @@
+<div *ngIf="sidenavOpen" class="flex flex-col gap-[24px] px-[16px] py-[16px] fixed z-10 dark:bg-[#1A1A1D] h-screen w-screen">
+    <mat-icon class="dark:text-white" fontIcon="close" (click) ="sidenavOpen = false"></mat-icon>
+    <p (click)="navigateTo('chat-tab')" class="dark:text-white text-base font-bold">Chats</p>
+    <p class="dark:text-white text-base font-bold">Chat Rooms</p>
+    
+    <div class="flex" (click)="userMenuOpen = !userMenuOpen">
+        <p class="dark:text-white text-base font-bold">User</p>
+        <mat-icon class="dark:text-white hover:cursor-pointer" [fontIcon]="userMenuOpen ? 'keyboard_arrow_down' : 'chevron_right'"></mat-icon>
+    </div>
+
+    <div *ngIf="userMenuOpen" class="ml-[8px] flex flex-col gap-[24px]">
+        <p (click)="navigateTo('profile')" class="dark:text-white text-base font-bold">Profile</p>
+        <p (click)="navigateTo('friends')" class="dark:text-white text-base font-bold">Friends</p>
+        <p (click)="logout()" class="dark:text-white text-base font-bold">Logout</p>
+    </div>
+</div>
+
 <div class="flex items-center justify-between px-[16px] h-12 w-full bg-[#7963e7]">
     <div class="flex items-center">
+        <mat-icon *ngIf="onMobile" class="dark:text-white hover:cursor-pointer mr-[8px]" fontIcon="menu" (click)="sidenavOpen=true"></mat-icon>
         <p class=" text-lg font-bold mr-[64px] dark:text-white">ChatStream</p>
-        <a routerLink="/chat-tab" class=" text-normal font-bold mr-[36px] dark:text-white">Chats</a>
-        <p class=" text-normal font-bold dark:text-white">Chat Rooms</p>
+        <a *ngIf="!onMobile" routerLink="/chat-tab" class=" text-normal font-bold mr-[36px] dark:text-white">Chats</a>
+        <p *ngIf="!onMobile" class=" text-normal font-bold dark:text-white">Chat Rooms</p>
     </div>
 
     <button mat-button [matMenuTriggerFor]="menu"><img class="h-[35px] w-[35px] bg-white rounded-full" [src]="pfp"/></button>
