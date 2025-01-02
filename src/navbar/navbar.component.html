@@ -1,0 +1,25 @@
+<div class="flex items-center justify-between px-[16px] h-12 w-full bg-[#7963e7]">
+    <div class="flex items-center">
+        <p class=" text-lg font-bold mr-[64px] dark:text-white">ChatStream</p>
+        <a routerLink="/chat-tab" class=" text-normal font-bold mr-[36px] dark:text-white">Chats</a>
+        <p class=" text-normal font-bold dark:text-white">Chat Rooms</p>
+    </div>
+
+    <button mat-button [matMenuTriggerFor]="menu"><img class="h-[35px] w-[35px] bg-white rounded-full" [src]="pfp"/></button>
+    <mat-menu #menu="matMenu">
+        <button (click)="navigateTo('profile')" mat-menu-item>
+            <span>Profile</span>
+            <mat-icon class="order-2" fontIcon="account_circle"></mat-icon>
+        </button>
+
+        <button (click)="navigateTo('friends')" mat-menu-item>
+        <span>Friends</span>
+        <mat-icon class="order-2" fontIcon="group"></mat-icon>
+        </button>
+
+        <button mat-menu-item (click)="logout()">
+        <span>Logout</span>
+        <mat-icon class="order-2" fontIcon="logout"></mat-icon>
+        </button>
+    </mat-menu>
+</div>
