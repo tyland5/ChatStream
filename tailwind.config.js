@@ -4,6 +4,7 @@ module.exports = {
   content: [
     "./src/home/home.component.{html,ts}",
     "./src/app/app.component.{html,ts}",
+    "./src/navbar/navbar.component.{html,ts}",
     "./src/login/login-form/login-form.component.{html,ts}",
     "./src/login/create-account/create-account.component.{html,ts}",
     "./src/login/email-verification/email-verification.component.{html,ts}",

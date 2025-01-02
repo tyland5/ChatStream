@@ -105,6 +105,7 @@ export class ChatTab implements OnInit, OnDestroy{
     this.chatListRxStomp.unsubscribe()
     this.activeChatSubscription.unsubscribe()
     this.personalUserInfoSubscription.unsubscribe()
+    this.chatTabService.updateActiveChat({chatId:"", chatName: "", isGc: false, members:[] as string[]})
   }
 
   // this is strictly for any updates to chatlist thanks to updates of a chat: members joining/leaving, new messages coming in
