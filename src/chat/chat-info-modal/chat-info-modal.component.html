@@ -7,6 +7,7 @@
         <div class ="flex gap-[8px]">
             <p class="text-base dark:text-white mb-[16px]">Members ({{gcMembers.length}}/10)</p>
             <mat-icon *ngIf="gcMembers.length<10" class="dark:text-white hover:cursor-pointer" fontIcon="add_circle" (click)="addingMembers = true"></mat-icon>
+            <mat-icon class="dark:text-red-500 hover:cursor-pointer" fontIcon="logout" (click)="leaveGc()"></mat-icon>
         </div>
     
         <div class="flex-1 min-h-0 overflow-auto">
@@ -23,7 +24,7 @@
 
     <div *ngIf="addingMembers" class="pt-[16px] h-full flex flex-col px-[16px]">
         <mat-icon class="dark:text-white hover:cursor-pointer" fontIcon="arrow_back" (click)="addingMembers = false"></mat-icon>
-        
+        <p class="text-base font-bold dark:text-white  mt-[16px]">Friends</p>
         <div class="flex-1 min-h-0 overflow-auto mt-[16px]">
             <div *ngFor="let friend of friendList" class="mb-[16px]">
                 <userlist-element (changeSelection)="modifySelectedUsers($event)" [inCreateChat]="true" [selected]="selectedUsers.has(friend.id)" id = "{{friend.id}}" name="{{friend.name}}" username="{{friend.username}}" pfp="{{friend.pfp}}"></userlist-element>

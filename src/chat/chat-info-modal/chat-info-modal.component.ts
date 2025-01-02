@@ -20,6 +20,7 @@ import { ChatInfoModalService } from "./chat-info-modal.service";
     data = inject(MAT_DIALOG_DATA);
     dialogRef = inject(MatDialogRef<ChatInfoModal>);
     chatName = this.data.chatName
+    chatId = this.data.chatId
 
     gcMembers: User[] = Object.hasOwn(this.data, "members") ? this.data.members as User[] : [] as User[]
     addingMembers:boolean = false;
@@ -53,12 +54,17 @@ import { ChatInfoModalService } from "./chat-info-modal.service";
       const selectedUsersInfo: User[] = this.friendList.filter(user => this.selectedUsers.has(user.id))
 
 
-      this.chatInfoModalService.addToGroupChat(this.data.chatId, this.chatName, selectedUsersInfo, this.gcMembers).subscribe(added=>{
+      this.chatInfoModalService.addToGroupChat(this.chatId, this.chatName, selectedUsersInfo, this.gcMembers).subscribe(added=>{
         if(added){
           this.addingMembers = false
           this.selectedUsers = new Set();
           selectedUsersInfo.forEach(user=> this.gcMembers.push(user)) // so user can see in the modal that the users were add through the member list
         }
       })
+    }
+
+    leaveGc(){
+      this.chatInfoModalService.leaveGroupChat(this.chatId)
+      this.dialogRef.close()
     }
   }
