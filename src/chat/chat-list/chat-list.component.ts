@@ -49,7 +49,7 @@ export class ChatList implements OnInit, OnDestroy{
 
   // helper function for ngFor of chatlist element
   getChatName(chat: ChatListResponse): string{
-    if(chat.members.length > 2){
+    if(chat.chatName != ""){
       return chat.chatName as string
     }
 
@@ -67,7 +67,7 @@ export class ChatList implements OnInit, OnDestroy{
   }
 
   getChatPic(chat: ChatListResponse): string{
-    if(chat.members.length > 2){
+    if(chat.chatName != ""){
       return chat.chatPic as string
     }
 
@@ -94,15 +94,18 @@ export class ChatList implements OnInit, OnDestroy{
     return {name: senderName, message:chat.latestMessage.message}
   }
 
-  getChatId(chat: ChatListResponse){
-    return chat.id
-  }
-
   closeCreateChat(newActiveChatId: string){
     this.creatingNewChat = false
 
     if(newActiveChatId === ""){
       return
     }
+  }
+
+  isVisible(chat:ChatListResponse){
+    if(chat?.hidden && chat.hidden.includes(this.personalUserInfo.id)){
+      return false
+    }
+    return true
   }
 }

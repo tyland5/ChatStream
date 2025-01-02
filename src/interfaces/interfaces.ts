@@ -16,6 +16,7 @@ export interface ChatListResponse{
     },
     chatName ?: string,
     chatPic ?: string
+    hidden?: string[]
 }
 
 export interface User{
@@ -44,5 +45,6 @@ export interface MessageResponse{
 export interface ActiveChat{
     chatId: string,
     chatName: string,
-    members: string[]
+    members: string[],
+    isGc: boolean
 }

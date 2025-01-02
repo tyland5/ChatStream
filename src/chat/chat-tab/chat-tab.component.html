@@ -4,6 +4,7 @@
     </div>
 
     <div [hidden]="onMobile && !showChatPage" class="md:w-4/5 w-full">
-        <chat-page [userInfoDict]="userInfoDict" (backPressed)="showChatPage=false"></chat-page>
+        <chat-page [chatId]="activeChat.chatId" [chatName]="activeChat.chatName" [members]="activeChat.members" [isGc]="activeChat.isGc"
+         [userInfoDict]="userInfoDict" (backPressed)="showChatPage=false"></chat-page>
     </div>
 </body>

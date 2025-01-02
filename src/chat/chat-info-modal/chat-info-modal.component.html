@@ -1,18 +1,38 @@
-<div class="dark dark:bg-[#1A1A1D] max-w-[500px] max-h-[450px] h-screen w-full relative flex flex-col">
-    <div class="border-b-2 border-b-black dark:border-b-white mb-[16px] py-[16px] px-[16px]">
-        <input type="text" class="w-full text-base border-none hover:bg-gray-600 bg-transparent font-semibold dark:text-white " value="chatName" [(ngModel)] = "chatName">
-    </div>
+<div class="dark dark:bg-[#1A1A1D] max-w-[500px] max-h-[450px] h-screen w-full relative">
+    <div *ngIf="!addingMembers" class="h-full flex flex-col px-[16px]">
+        <div class="border-b-2 border-b-black dark:border-b-white mb-[16px] py-[16px]">
+            <input type="text" class="w-full text-base border-none hover:bg-gray-600 bg-transparent font-semibold dark:text-white " value="chatName" [(ngModel)] = "chatName">
+        </div>
+        
+        <div class ="flex gap-[8px]">
+            <p class="text-base dark:text-white mb-[16px]">Members ({{gcMembers.length}}/10)</p>
+            <mat-icon *ngIf="gcMembers.length<10" class="dark:text-white hover:cursor-pointer" fontIcon="add_circle" (click)="addingMembers = true"></mat-icon>
+            <mat-icon class="dark:text-red-500 hover:cursor-pointer" fontIcon="logout" (click)="leaveGc()"></mat-icon>
+        </div>
     
-    <p class="text-base dark:text-white px-[16px] mb-[16px]">Members</p>
-
-    <div class="flex-1 min-h-0 overflow-auto">
-        <div class="mb-[20px] px-[16px]" *ngFor="let member of data.members">
-            <userlist-element id = "{{member.id}}" name="{{member.name}}" username="{{member.username}}" pfp="{{member.pfp}}"></userlist-element>
+        <div class="flex-1 min-h-0 overflow-auto">
+            <div class="mb-[20px]" *ngFor="let member of gcMembers">
+                <userlist-element id = "{{member.id}}" name="{{member.name}}" username="{{member.username}}" pfp="{{member.pfp}}"></userlist-element>
+            </div>
+        </div>
+        
+        <div class="w-full h-fit py-[16px] flex justify-end gap-[32px]">
+            <button class="text-base dark:text-white py-1 px-2 rounded-lg bg-gray-500 hover:bg-gray-600" (click)="dialogRef.close()">Cancel</button>
+            <button class="text-base dark:text-white mr-[16px] py-1 px-2 rounded-lg bg-purple-400 hover:bg-purple-500" [mat-dialog-close]="chatName">Save</button>
         </div>
     </div>
-    
-    <div class="w-full h-fit py-[16px] flex justify-end gap-[32px]">
-        <button class="text-base dark:text-white py-1 px-2 rounded-lg bg-gray-500 hover:bg-gray-600" (click)="dialogRef.close()">Cancel</button>
-        <button class="text-base dark:text-white mr-[16px] py-1 px-2 rounded-lg bg-purple-400 hover:bg-purple-500" [mat-dialog-close]="chatName">Save</button>
+
+    <div *ngIf="addingMembers" class="pt-[16px] h-full flex flex-col px-[16px]">
+        <mat-icon class="dark:text-white hover:cursor-pointer" fontIcon="arrow_back" (click)="addingMembers = false"></mat-icon>
+        <p class="text-base font-bold dark:text-white  mt-[16px]">Friends</p>
+        <div class="flex-1 min-h-0 overflow-auto mt-[16px]">
+            <div *ngFor="let friend of friendList" class="mb-[16px]">
+                <userlist-element (changeSelection)="modifySelectedUsers($event)" [inCreateChat]="true" [selected]="selectedUsers.has(friend.id)" id = "{{friend.id}}" name="{{friend.name}}" username="{{friend.username}}" pfp="{{friend.pfp}}"></userlist-element>
+            </div>
+        </div>
+
+        <button *ngIf="selectedUsers.size !== 0" class="p-[10px] self-center bg-purple-500 rounded-lg my-[16px]" (click) = "addMember()">
+            <p class="dark:text-white">Add</p>
+        </button>
     </div>
 </div>

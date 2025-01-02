@@ -19,8 +19,8 @@ export class ChatTab implements OnInit, OnDestroy{
   chatList: ChatListResponse[] = []
   userInfoDict:  { [id: string]: User } = {} // comprehensive for all chats. maybe pass down info of particular chat in future?
   creatingNewChat: boolean = false
-  activeChat: ActiveChat = {} as ActiveChat
-  chatSubscriptions : Subscription[] = []
+  activeChat: ActiveChat = {chatId:"",  chatName:"", members:[], isGc:  false}
+  chatSubscriptions : {[key:string]: Subscription} = {} // dictionary in case a user leaves a group chat. need to unsubscribe
   chatListSubscription: Subscription;
   chatListRxStomp: Subscription;
   activeChatSubscription: Subscription;
@@ -43,8 +43,8 @@ export class ChatTab implements OnInit, OnDestroy{
     this.activeChatSubscription = this.chatTabService.activeChat.subscribe(currentChat =>{
       if(currentChat.chatId !== ""){
         this.showChatPage = true
-        this.activeChat = currentChat
       } 
+      this.activeChat = currentChat
     })
 
 
@@ -55,30 +55,12 @@ export class ChatTab implements OnInit, OnDestroy{
     })
 
 
-    // this is for any new chats that are created from publish in backend
+    // this is for any new chats that are created from publish in backend (both single and gc)
     // this also considers if a gc has been updated (name, picture)
     this.chatListRxStomp = this.chatlistService.getChatlistSubscription(this.uid).subscribe(response => {
       const responseBody: ChatListResponse & {memberObjects: User[]} = JSON.parse(response.body)
       const newChat: ChatListResponse = {...responseBody}
       const usersToAdd: User[] = responseBody.memberObjects
-
-      // if a group chat has been updated, memberObjects will be empty 
-      if(usersToAdd.length == 0){
-        const chatIndex = this.chatList.findIndex((chat) => chat.id === newChat.id)
-        const updatedChat = this.chatList[chatIndex]
-        updatedChat.chatName = newChat.chatName
-       
-        const newChatList = [updatedChat, ...this.chatList.filter((chat) => chat.id != newChat.id)]
-        this.chatTabService.updateChatList(newChatList)
-        
-        // this is primarily for other user. if the chat is pulled up when another changes chat name, we need to force update it
-        // through the active chat since chat page uses that name property
-        if(this.activeChat.chatId == newChat.id){
-          this.chatTabService.updateActiveChat({...this.activeChat, chatName: newChat.chatName as string})
-        }
-        
-        return 
-      }
 
       // in case friend adds you to a gc w/ non mutual friends. need to add users to userinfodict for proper rendering
       usersToAdd.forEach(user=>this.userInfoDict[user.id] = user)
@@ -115,7 +97,7 @@ export class ChatTab implements OnInit, OnDestroy{
   }
 
   ngOnDestroy(): void {
-    this.chatSubscriptions.forEach(subscription => {
+    Object.values(this.chatSubscriptions).forEach(subscription => {
       subscription.unsubscribe()
     })
 
@@ -125,33 +107,93 @@ export class ChatTab implements OnInit, OnDestroy{
     this.personalUserInfoSubscription.unsubscribe()
   }
 
+  // this is strictly for any updates to chatlist thanks to updates of a chat: members joining/leaving, new messages coming in
+  // chat page will have to handle members leaving and joining when in chat room tab
   createChatSubscription(chat: ChatListResponse) : void{
     // create observable for this component and chat page component first
     const chatPubSub = this.chatPageService.changeSubscription(chat.id)
-
-    // whenever a message update comes from a chat, check if you need to update the chatlist element (moving it on top or updating recent message)
+    
+    // whenever a message update comes from a chat, check if you need to update the CHATLIST element (moving it on top or updating recent message)
     const chatSub = chatPubSub.subscribe(message => {
       const messageObj: MessageResponse= JSON.parse(message.body)
       const index = this.chatList.findIndex((chat) => chat.id === messageObj.chatId)
 
-      // if message was edited or deleted and was not the most recent, we dont care about updating chatlist
-      if(messageObj.type !== "create" && messageObj.id !== this.chatList[index].latestMessage.messageId){
-        return
+      // this is related to anything that updates the group chat info. live updates on info doesnt return message id
+      if(messageObj.id === ""){
+        this.updateGcInfo(messageObj, index)
       }
-
-      const messageProperty = messageObj.type === "delete" ? "Message Deleted" : messageObj.message
-      const senderIdProperty = messageObj.type === "create" ? messageObj.sender : this.chatList[index].latestMessage.uid
-      this.chatList[index] = {...this.chatList[index], latestMessage:{uid: senderIdProperty, message: messageProperty, messageId: messageObj.id}}
-
-      // if someone edits or delete a message, we dont want the chat to appear at the top since not important
-      if(messageObj.type === "create"){
-        this.chatTabService.updateChatList([this.chatList[index], ...this.chatList.slice(0, index), ...this.chatList.slice(index+1)]) // slice handles out of bounds 
-      }
+      // any updates to message list: create, edit, delete
       else{
-        this.chatTabService.updateChatList([...this.chatList])
+        this.updateMessageList(messageObj, index)
       }
     })
 
-    this.chatSubscriptions.push(chatSub)
+    this.chatSubscriptions[chat.id] = chatSub
+  }
+
+
+  updateGcInfo(messageObj: MessageResponse, index: number){
+    if(messageObj.type === "leave"){
+      // if the user themselves are leaving
+      if(messageObj.sender === this.uid){
+        this.chatSubscriptions[messageObj.chatId].unsubscribe() // this is to remove the subscription so we dont get new messages
+        this.chatTabService.removeChat(messageObj.chatId) // this is to remove chat from chat list
+      }
+      else{
+        const newMemberList = this.chatList[index].members.filter(id => id != messageObj.sender)
+        this.chatList[index].members = newMemberList
+        
+        if(this.activeChat.chatId === messageObj.chatId){ //required in case user has the gc open. the modal wont reflect the user leaving without this
+          this.chatTabService.updateActiveChat({...this.activeChat, members:newMemberList})
+        }
+      }
+    }
+
+    else if(messageObj.type === "add"){
+      const usersToAdd: User[] = JSON.parse(messageObj.message) 
+      
+      usersToAdd.forEach(user => {
+        this.chatList[index].members.push(user.id)
+        this.userInfoDict[user.id] = user
+      })
+
+      this.chatTabService.updateChatList([...this.chatList])
+      if(this.activeChat.chatId === messageObj.chatId){ //required in case user has the gc open. the modal wont reflect the user leaving without this
+        this.chatTabService.updateActiveChat({...this.activeChat, members: this.chatList[index].members})
+      }
+    }
+
+    else if(messageObj.type === "update name"){
+      const updatedChat = this.chatList[index]
+      updatedChat.chatName = messageObj.message
+      
+      const newChatList = [updatedChat, ...this.chatList.filter((chat) => chat.id != updatedChat.id)]
+      this.chatTabService.updateChatList(newChatList)
+      
+      // this is primarily for other user. if the chat is displayed when another changes chat name, we need to force update the name
+      // through the active chat since chat page uses that name property
+      if(this.activeChat.chatId == updatedChat.id){
+        this.chatTabService.updateActiveChat({...this.activeChat, chatName: messageObj.message})
+      }
+    }
+  }
+
+  updateMessageList(messageObj:MessageResponse, index: number){
+    // if message was edited or deleted and was not the most recent, we dont care about updating chatlist
+    if(messageObj.type !== "create" && messageObj.id !== this.chatList[index].latestMessage.messageId){
+      return
+    }
+
+    const messageProperty = messageObj.type === "delete" ? "Message Deleted" : messageObj.message
+    const senderIdProperty = messageObj.type === "create" ? messageObj.sender : this.chatList[index].latestMessage.uid
+    this.chatList[index] = {...this.chatList[index], latestMessage:{uid: senderIdProperty, message: messageProperty, messageId: messageObj.id}, hidden:[]}
+
+    // if someone edits or delete a message, we dont want the chat to appear at the top since not important
+    if(messageObj.type === "create"){
+      this.chatTabService.updateChatList([this.chatList[index], ...this.chatList.slice(0, index), ...this.chatList.slice(index+1)]) // slice handles out of bounds 
+    }
+    else{
+      this.chatTabService.updateChatList([...this.chatList])
+    }
   }
 }
