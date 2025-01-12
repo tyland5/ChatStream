@@ -33,7 +33,10 @@ export class ChatTab implements OnInit, OnDestroy{
 
   constructor(private chatlistService: ChatListService, private chatPageService: ChatPageService, private friendsService: FriendsService, private chatTabService: ChatTabService, 
     private personalUserInfoService: PersonalUserInfoService){
-      this.personalUserInfoSubscription = this.personalUserInfoService.userInfo.subscribe(info  => this.uid = info.id)
+      this.personalUserInfoSubscription = this.personalUserInfoService.userInfo.subscribe(info  => {
+        this.uid = info.id;
+        this.userInfoDict[this.uid] = info // need this in case of empty chat list. dont have own user info in userinfodict
+      })
   }
   
   // keeping these calls here because if I switched to mobile view and conditionally rendered chatlist, then these would always execute on init when it shouldn't
