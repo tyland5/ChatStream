@@ -1,7 +1,7 @@
 <div>
     <div (contextmenu)="onRightClick($event)" [ngClass]="{'bg-gray-600': highlightedMessage === true}" class="flex gap-[10px] mb-[20px] hover:bg-gray-600">
         <div class="min-h-[40px] min-w-[40px]">
-            <img class="h-[40px] w-[40px] bg-white rounded-full" [src]="messageInfo.senderInfo.pfp"/>
+            <img class="h-[40px] w-[40px] bg-white rounded-full" [src]="messageInfo.senderInfo.pfp !== '' ? messageInfo.senderInfo.pfp : 'blank-pfp.png'"/>
         </div>
             
         <div class="flex-1">

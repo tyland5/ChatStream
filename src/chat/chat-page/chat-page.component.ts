@@ -174,7 +174,8 @@ export class ChatPage implements OnDestroy, OnInit, OnChanges{
       data: {
         members: memberList,
         chatName: this.chatName,
-        chatId: this.chatId
+        chatId: this.chatId,
+        chatPic: ''
       },
     });
 

@@ -23,7 +23,7 @@
         <p *ngIf="!onMobile" class=" text-normal font-bold dark:text-white">Chat Rooms</p>
     </div>
 
-    <button mat-button [matMenuTriggerFor]="menu"><img class="h-[35px] w-[35px] bg-white rounded-full" [src]="pfp"/></button>
+    <button mat-button [matMenuTriggerFor]="menu"><img class="h-[35px] w-[35px] bg-white rounded-full" [src]="pfp !== '' ? pfp : 'blank-pfp.png'"/></button>
     <mat-menu #menu="matMenu">
         <button (click)="navigateTo('profile')" mat-menu-item>
             <span>Profile</span>

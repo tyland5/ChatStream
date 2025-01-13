@@ -34,7 +34,7 @@
         </div>
 
         <div class="flex items-center">
-            <input type="file" #fileInput (change)="onFileSelected($event)" class="hidden">
+            <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/jpeg,image/jpg,image/png" class="hidden">
             <mat-icon (click)="fileInput.click()" class="mr-[10px] dark:text-white hover:cursor-pointer" fontIcon="add_a_photo"></mat-icon>
 
             <mat-form-field class="flex-1" subscriptSizing="dynamic">

@@ -25,7 +25,7 @@ export class ChatInfoModalService{
     }
 
     //  users are the ones being added
-    addToGroupChat(chatId: string, chatName: string, users: User[], members: User[]){
+    addToGroupChat(chatId: string, chatName: string, chatPic: string, users: User[], members: User[]){
         const membersAdded = new Subject<boolean>();
         const uids = users.map(user => user.id)
 
@@ -37,7 +37,7 @@ export class ChatInfoModalService{
                 const newMemberList = [...users, ...members]
                 // this publish is so the new users add the group chat to their chat list in chat tab component
                 uids.forEach(uid=>this.rxStomp.publish({destination:"/chatlist/updateChatlist/" + uid, 
-                    body:JSON.stringify({id:chatId, chatName: chatName, memberObjects: newMemberList, members: newMemberList.map(user=>user.id)})}))
+                    body:JSON.stringify({id:chatId, chatName: chatName, chatPic: chatPic, memberObjects: newMemberList, members: newMemberList.map(user=>user.id)})}))
                 
                 membersAdded.next(true)
             }else{membersAdded.next(false)}

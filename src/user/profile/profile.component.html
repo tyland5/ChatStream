@@ -1,6 +1,6 @@
 <div class="mt-[20px] flex flex-col items-center" *ngIf="!editingImage">
   
-  <input type="file" #fileInput (change)="onFileChange($event)" class="hidden"/>
+  <input type="file" accept="image/jpeg,image/jpg,image/png" #fileInput (change)="onFileChange($event)" class="hidden"/>
   
   <div (click)="fileInput.click()" (mouseenter)="hoveredPfp=true" (mouseleave)="hoveredPfp=false" class="relative h-[150px] w-[150px] rounded-full mb-[20px] hover:cursor-pointer">
     <img [src]="newPfp != '' ? newPfp : userInfo.pfp" class="bg-white h-[150px] w-[150px] rounded-full object-cover" />
