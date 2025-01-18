@@ -134,7 +134,9 @@ export class ChatPage implements OnDestroy, OnInit, OnChanges{
   }
 
   createMessageInput(chat: MessageResponse){
-    const userInfo = this.userInfoDict[chat.sender]
+    // user not in dictionary would be a person that left the gc that's not a direct friend
+    const userInfo = chat.sender in this.userInfoDict ? this.userInfoDict[chat.sender] :  ({pfp:"", name:"Departed Stranger", username:"", id:""} as User)
+
     return {messageObj: chat, senderInfo: userInfo}
   }
 

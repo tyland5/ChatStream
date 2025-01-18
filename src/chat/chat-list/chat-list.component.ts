@@ -90,7 +90,10 @@ export class ChatList implements OnInit, OnDestroy{
     if(chat.latestMessage === null){
       return {name: "", message: ""}
     }
-    const senderName: string = this.userInfoDict[chat.latestMessage.uid].name
+
+    // for users leaving and added to chat. no sender id attached to message
+    const senderName: string =  chat.latestMessage.uid in this.userInfoDict ? this.userInfoDict[chat.latestMessage.uid].name : "System"
+
     return {name: senderName, message:chat.latestMessage.message}
   }
 

@@ -6,6 +6,7 @@ import { RxStompService } from "../../global-services/rxstomp.service";
 import { RxStompServiceBase } from "../../global-services/rxstomp.service";
 import { PersonalUserInfoService } from "../../global-services/personalUserinfo.service";
 import { User } from "../../interfaces/interfaces";
+import { ChatPageService } from "../chat-page/chat-page.service";
 
 @Injectable({
     providedIn: 'root',
@@ -18,7 +19,7 @@ export class ChatInfoModalService{
 
     rxStomp: RxStompServiceBase;
 
-    constructor(private personalUserInfoService:  PersonalUserInfoService, private http: HttpClient, private rxStompService: RxStompService){
+    constructor(private personalUserInfoService:  PersonalUserInfoService, private http: HttpClient, private rxStompService: RxStompService, private chatPageService: ChatPageService){
         this.personalUserInfoServiceSubscription = this.personalUserInfoService.userInfo.subscribe(info=> this.uid = info.id)
         this.csrfSubscription = this.personalUserInfoService.csrf.subscribe(csrf=> this.csrf = csrf)
         this.rxStomp = this.rxStompService.getConnection()
@@ -34,6 +35,10 @@ export class ChatInfoModalService{
             if(response.updated){
                 // this publish is so existing group memebers can add new members in the member view. chat tab component handles the publish response
                 this.rxStomp.publish({destination: "/chat/updateGcInfo/" + chatId, body:JSON.stringify({chatId: chatId, sender: this.uid, type:"add", message:JSON.stringify(users)})})
+
+                // this is to add message that a user has been added
+                this.chatPageService.sendMessage("User(s) " + uids.join(", ") + " added to chat", chatId, "", undefined)
+
                 const newMemberList = [...users, ...members]
                 // this publish is so the new users add the group chat to their chat list in chat tab component
                 uids.forEach(uid=>this.rxStomp.publish({destination:"/chatlist/updateChatlist/" + uid, 
@@ -53,6 +58,7 @@ export class ChatInfoModalService{
                 // members will remove user leaving gc from member list while the person leaving will unsubscribe from websocket and delete the chat from chat list. 
                 // Done through chat tab component
                 this.rxStomp.publish({destination: "/chat/updateGcInfo/" + chatId, body:JSON.stringify({chatId: chatId, sender: this.uid, type:"leave"})})
+                this.chatPageService.sendMessage("User " + this.uid + " left the chat", chatId, "", undefined)
             }
         })
     }

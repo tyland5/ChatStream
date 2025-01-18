@@ -15,7 +15,7 @@
 
     <div #chatMessages
     class="overflow-y-scroll py-[16px] px-[10px] flex-1" *ngIf ="chatId !== ''">
-        <div *ngFor="let message of chatHistory">
+        <div class="mb-[20px]" *ngFor="let message of chatHistory">
             <chat-message (editingMessageId)="changeEditingMessageId($event)" [mediaUrl]="message.media" [messageInfo]="createMessageInput(message)" [highlightedMessage] = "editingMessageId === message.id"></chat-message>
         </div>
     </div>
